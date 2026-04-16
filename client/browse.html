@@ -5,63 +5,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BookShare — Перегляд книг</title>
     <link rel="stylesheet" href="css/styles.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body>
-     <!-- ===================== НАВІГАЦІЯ ===================== -->
+    <!-- ===================== НАВІГАЦІЯ ===================== -->
     <header class="navbar">
       <a href="index.html" class="logo">
-        <!-- Іконка книги (SVG inline) -->
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-right:10px;">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#00a870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#00a870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         BookShare
       </a>
-
       <nav>
         <a href="index.html">Головна</a>
         <a href="browse.html" class="active">Переглянути книги</a>
         <a href="profile.html">Мої книги</a>
       </nav>
-
       <div class="nav-right">
         <a href="add-book.html" class="add-book-btn">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10"/>
-            <line x1="12" y1="8" x2="12" y2="16"/>
-            <line x1="8" y1="12" x2="16" y2="12"/>
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
           </svg>
           Додати книгу
         </a>
         <a href="profile.html" class="profile-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
           </svg>
         </a>
       </div>
     </header>
+
     <!-- ===================== ОСНОВНИЙ КОНТЕНТ ===================== -->
     <main class="browse-main">
 
-      <!-- Заголовок -->
       <section class="browse-page-header">
         <h1>Перегляд книг</h1>
-        <p>Знайдіть <span id="books-count">8</span> книг, доступних для обміну</p>
+        <p>Знайдіть <span id="books-count">0</span> книг, доступних для обміну</p>
       </section>
 
       <!-- Пошук + фільтри -->
       <div class="browse-toolbar">
         <div class="browse-search-box">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
           <input type="text" id="search-input" placeholder="Пошук за назвою або автором..." />
         </div>
         <button class="filters-toggle-btn" id="filters-toggle">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
+          </svg>
           Фільтри
         </button>
       </div>
@@ -70,47 +65,48 @@
       <div class="browse-layout">
 
         <!-- Сайдбар фільтрів -->
+        <!-- Значення value — англійські slug-и, що зберігаються в БД -->
         <aside class="filters-sidebar" id="filters-sidebar">
 
           <div class="filter-group">
             <h3>Категорія</h3>
             <label class="filter-option">
-              <input type="checkbox" name="category" value="Навчальна" />
+              <input type="checkbox" name="category" value="educational" />
               <span>Навчальна</span>
               <span class="filter-count" id="count-educational">0</span>
             </label>
             <label class="filter-option">
-              <input type="checkbox" name="category" value="Художня" />
+              <input type="checkbox" name="category" value="fiction" />
               <span>Художня</span>
               <span class="filter-count" id="count-fiction">0</span>
             </label>
             <label class="filter-option">
-              <input type="checkbox" name="category" value="Технічна" />
+              <input type="checkbox" name="category" value="technical" />
               <span>Технічна</span>
               <span class="filter-count" id="count-technical">0</span>
             </label>
             <label class="filter-option">
-              <input type="checkbox" name="category" value="Наука" />
+              <input type="checkbox" name="category" value="science" />
               <span>Наука</span>
               <span class="filter-count" id="count-science">0</span>
             </label>
             <label class="filter-option">
-              <input type="checkbox" name="category" value="Література" />
+              <input type="checkbox" name="category" value="literature" />
               <span>Література</span>
               <span class="filter-count" id="count-literature">0</span>
             </label>
             <label class="filter-option">
-              <input type="checkbox" name="category" value="Історія" />
+              <input type="checkbox" name="category" value="history" />
               <span>Історія</span>
               <span class="filter-count" id="count-history">0</span>
             </label>
             <label class="filter-option">
-              <input type="checkbox" name="category" value="Математика" />
+              <input type="checkbox" name="category" value="mathematics" />
               <span>Математика</span>
               <span class="filter-count" id="count-mathematics">0</span>
             </label>
             <label class="filter-option">
-              <input type="checkbox" name="category" value="Програмування" />
+              <input type="checkbox" name="category" value="programming" />
               <span>Програмування</span>
               <span class="filter-count" id="count-programming">0</span>
             </label>
@@ -119,27 +115,27 @@
           <div class="filter-group">
             <h3>Стан</h3>
             <label class="filter-option">
-              <input type="checkbox" name="condition" value="Як нова" />
+              <input type="checkbox" name="condition" value="likenew" />
               <span>Як нова</span>
               <span class="filter-count" id="count-likenew">0</span>
             </label>
             <label class="filter-option">
-              <input type="checkbox" name="condition" value="Дуже добрий" />
+              <input type="checkbox" name="condition" value="verygood" />
               <span>Дуже добрий</span>
               <span class="filter-count" id="count-verygood">0</span>
             </label>
             <label class="filter-option">
-              <input type="checkbox" name="condition" value="Добрий" />
+              <input type="checkbox" name="condition" value="good" />
               <span>Добрий</span>
               <span class="filter-count" id="count-good">0</span>
             </label>
             <label class="filter-option">
-              <input type="checkbox" name="condition" value="Прийнятний" />
+              <input type="checkbox" name="condition" value="acceptable" />
               <span>Прийнятний</span>
               <span class="filter-count" id="count-acceptable">0</span>
             </label>
             <label class="filter-option">
-              <input type="checkbox" name="condition" value="Задовільний" />
+              <input type="checkbox" name="condition" value="fair" />
               <span>Задовільний</span>
               <span class="filter-count" id="count-fair">0</span>
             </label>
@@ -150,168 +146,15 @@
         <!-- Сітка книг -->
         <div class="books-area">
           <div class="books-grid" id="books-grid">
-
-            <!-- Книга 1 -->
-            <article class="book-card" data-category="Технічна" data-condition="Дуже добрий">
-              <img class="cover" src="https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=280&fit=crop" alt="Вступ до алгоритмів" />
-              <div class="book-card-body">
-                <div class="book-card-top">
-                  <h3 class="book-title">Вступ до алгоритмів</h3>
-                  <span class="condition-badge condition-verygood">Дуже добрий</span>
-                </div>
-                <p class="book-author">Томас Г. Кормен</p>
-                <div class="book-card-footer">
-                  <span class="tag">Технічна</span>
-                  <span class="book-owner">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Сара
-                  </span>
-                </div>
-              </div>
-            </article>
-
-            <!-- Книга 2 -->
-            <article class="book-card" data-category="Художня" data-condition="Добрий">
-              <img class="cover" src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=400&h=280&fit=crop" alt="Гордість і упередження" />
-              <div class="book-card-body">
-                <div class="book-card-top">
-                  <h3 class="book-title">Гордість і упере...</h3>
-                  <span class="condition-badge condition-good">Добрий</span>
-                </div>
-                <p class="book-author">Джейн Остін</p>
-                <div class="book-card-footer">
-                  <span class="tag">Художня</span>
-                  <span class="book-owner">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Михайло
-                  </span>
-                </div>
-              </div>
-            </article>
-
-            <!-- Книга 3 -->
-            <article class="book-card" data-category="Математика" data-condition="Як нова">
-              <img class="cover" src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=400&h=280&fit=crop" alt="Числення: Ранні трансцендентні" />
-              <div class="book-card-body">
-                <div class="book-card-top">
-                  <h3 class="book-title">Числення: Ранні...</h3>
-                  <span class="condition-badge condition-likenew">Як нова</span>
-                </div>
-                <p class="book-author">Джеймс Стюарт</p>
-                <div class="book-card-footer">
-                  <span class="tag">Математика</span>
-                  <span class="book-owner">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Сара
-                  </span>
-                </div>
-              </div>
-            </article>
-
-            <!-- Книга 4 -->
-            <article class="book-card" data-category="Література" data-condition="Дуже добрий">
-              <img class="cover" src="https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400&h=280&fit=crop" alt="Великий Гетсбі" />
-              <div class="book-card-body">
-                <div class="book-card-top">
-                  <h3 class="book-title">Великий Гетсбі</h3>
-                  <span class="condition-badge condition-verygood">Дуже добрий</span>
-                </div>
-                <p class="book-author">Ф. Скотт Фіцджеральд</p>
-                <div class="book-card-footer">
-                  <span class="tag">Література</span>
-                  <span class="book-owner">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Емма
-                  </span>
-                </div>
-              </div>
-            </article>
-
-            <!-- Книга 5 -->
-            <article class="book-card" data-category="Програмування" data-condition="Добрий">
-              <img class="cover" src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?w=400&h=280&fit=crop" alt="Python: Аварійний курс" />
-              <div class="book-card-body">
-                <div class="book-card-top">
-                  <h3 class="book-title">Python: Аварійний...</h3>
-                  <span class="condition-badge condition-good">Добрий</span>
-                </div>
-                <p class="book-author">Ерік Меттес</p>
-                <div class="book-card-footer">
-                  <span class="tag">Програмування</span>
-                  <span class="book-owner">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Михайло
-                  </span>
-                </div>
-              </div>
-            </article>
-
-            <!-- Книга 6 -->
-            <article class="book-card" data-category="Наука" data-condition="Дуже добрий">
-              <img class="cover" src="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&h=280&fit=crop" alt="Коротка історія часу" />
-              <div class="book-card-body">
-                <div class="book-card-top">
-                  <h3 class="book-title">Коротка історія...</h3>
-                  <span class="condition-badge condition-verygood">Дуже добрий</span>
-                </div>
-                <p class="book-author">Стівен Гокінг</p>
-                <div class="book-card-footer">
-                  <span class="tag">Наука</span>
-                  <span class="book-owner">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Емма
-                  </span>
-                </div>
-              </div>
-            </article>
-
-            <!-- Книга 7 -->
-            <article class="book-card" data-category="Навчальна" data-condition="Добрий">
-              <img class="cover" src="https://images.unsplash.com/photo-1532012197267-da84d127e765?w=400&h=280&fit=crop" alt="Біологія: Концепції та зв'язки" />
-              <div class="book-card-body">
-                <div class="book-card-top">
-                  <h3 class="book-title">Біологія: Концепт...</h3>
-                  <span class="condition-badge condition-good">Добрий</span>
-                </div>
-                <p class="book-author">Ніл Кемпбелл</p>
-                <div class="book-card-footer">
-                  <span class="tag">Навчальна</span>
-                  <span class="book-owner">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Сара
-                  </span>
-                </div>
-              </div>
-            </article>
-
-            <!-- Книга 8 -->
-            <article class="book-card" data-category="Історія" data-condition="Прийнятний">
-              <img class="cover" src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=400&h=280&fit=crop" alt="Всесвітня Історія" />
-              <div class="book-card-body">
-                <div class="book-card-top">
-                  <h3 class="book-title">Всесвітня Істор...</h3>
-                  <span class="condition-badge condition-acceptable">Прийнятний</span>
-                </div>
-                <p class="book-author">Різні автори</p>
-                <div class="book-card-footer">
-                  <span class="tag">Історія</span>
-                  <span class="book-owner">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Михайло
-                  </span>
-                </div>
-              </div>
-            </article>
-
+            <!-- Завантажується через JS -->
           </div>
-
-          <!-- Порожній стан -->
           <div class="empty-state" id="empty-state" style="display:none;">
-            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
             <p>Книг не знайдено</p>
             <span>Спробуйте змінити фільтри або пошуковий запит</span>
           </div>
-
         </div>
       </div>
     </main>
@@ -319,17 +162,15 @@
     <!-- ===================== ФУТЕР ===================== -->
     <footer class="footer">
       <div class="footer-container">
-
-        <!-- Колонка 1: лого + соцмережі -->
         <div class="footer-col">
           <div class="footer-logo">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
               <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#00a870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#00a870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
             <h3>BookShare</h3>
           </div>
-          <p style="margin-bottom:18px;">Об'єднуємо студентів через силу спільних знань. Обмінюйтесь книгами, заощаджуйте гроші, будуйте спільноту.</p>
+          <p>Об'єднуємо студентів через силу спільних знань.</p>
           <div class="socials">
             <a href="#" class="social-btn" aria-label="Twitter">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
@@ -342,8 +183,6 @@
             </a>
           </div>
         </div>
-
-        <!-- Колонка 2: швидкі посилання -->
         <div class="footer-col">
           <h4>Швидкі посилання</h4>
           <div class="footer-links">
@@ -353,19 +192,15 @@
             <a href="profile.html">Мій профіль</a>
           </div>
         </div>
-
-        <!-- Колонка 3: категорії -->
         <div class="footer-col">
           <h4>Категорії</h4>
           <div class="footer-links">
-            <a href="browse.html?category=educational">Освітні</a>
+            <a href="browse.html?category=educational">Навчальні</a>
             <a href="browse.html?category=fiction">Художня</a>
             <a href="browse.html?category=technical">Технічна</a>
             <a href="browse.html?category=programming">Програмування</a>
           </div>
         </div>
-
-        <!-- Колонка 4: контакти -->
         <div class="footer-col">
           <h4>Зв'яжіться з нами</h4>
           <p style="margin-bottom:10px;">
@@ -377,90 +212,94 @@
           </p>
           <p style="color:#aab0bc;">Понеділок — П'ятниця<br/>9:00 — 17:00</p>
         </div>
-
       </div>
-
       <hr />
-
       <div class="footer-bottom">
         <span>© 2026 BookShare. Всі права захищено.</span>
         <span>Зроблено з <span class="heart">♥</span> для студентів</span>
       </div>
     </footer>
 
+    <script type="module">
+      import { auth, booksApi, buildBookCard, CATEGORY_LABELS, CONDITION_LABELS } from "./js/api.js";
+      import "./js/main.js"; // ініціалізує navbar dropdown
 
-    <script>
-      // ===================== ФІЛЬТРАЦІЯ + ПОШУК =====================
-      const allCards = Array.from(document.querySelectorAll('.book-card'));
+      const grid       = document.getElementById("books-grid");
+      const countEl    = document.getElementById("books-count");
+      const emptyState = document.getElementById("empty-state");
 
+      let allBooks = [];
+
+      // ── Зчитуємо початкові фільтри з URL ──────────────────
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlCategory = urlParams.get("category");
+      const urlSearch   = urlParams.get("search");
+
+      if (urlCategory) {
+        const cb = document.querySelector(`input[name="category"][value="${urlCategory}"]`);
+        if (cb) cb.checked = true;
+      }
+      if (urlSearch) {
+        document.getElementById("search-input").value = urlSearch;
+      }
+
+      // ── Завантажуємо всі книги ─────────────────────────────
+      async function loadBooks() {
+        try {
+          allBooks = await booksApi.getAll();
+          updateCounts();
+          applyFilters();
+        } catch (e) {
+          grid.innerHTML = "<p style='color:#c00;grid-column:1/-1;text-align:center'>Не вдалося завантажити книги.</p>";
+        }
+      }
+
+      // ── Лічильники по фільтрах ────────────────────────────
       function updateCounts() {
-        const categoryCounts = {};
-        const conditionCounts = {};
-
-        allCards.forEach(card => {
-          const cat = card.dataset.category;
-          const cond = card.dataset.condition;
-          categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
-          conditionCounts[cond] = (conditionCounts[cond] || 0) + 1;
+        const catMap  = {};
+        const condMap = {};
+        allBooks.forEach(b => {
+          if (b.category)  catMap[b.category]   = (catMap[b.category]  || 0) + 1;
+          if (b.condition) condMap[b.condition]  = (condMap[b.condition]|| 0) + 1;
         });
 
-        const catMap = {
-          'Навчальна': 'educational', 'Художня': 'fiction', 'Технічна': 'technical',
-          'Наука': 'science', 'Література': 'literature', 'Історія': 'history',
-          'Математика': 'mathematics', 'Програмування': 'programming'
-        };
-        const condMap = {
-          'Як нова': 'likenew', 'Дуже добрий': 'verygood', 'Добрий': 'good',
-          'Прийнятний': 'acceptable', 'Задовільний': 'fair'
-        };
-
-        Object.entries(catMap).forEach(([name, id]) => {
-          const el = document.getElementById('count-' + id);
-          if (el) el.textContent = categoryCounts[name] || 0;
-        });
-        Object.entries(condMap).forEach(([name, id]) => {
-          const el = document.getElementById('count-' + id);
-          if (el) el.textContent = conditionCounts[name] || 0;
+        document.querySelectorAll("[id^='count-']").forEach(el => {
+          const key = el.id.replace("count-", "");
+          el.textContent = catMap[key] ?? condMap[key] ?? 0;
         });
       }
 
+      // ── Фільтрація ────────────────────────────────────────
       function applyFilters() {
-        const search = document.getElementById('search-input').value.toLowerCase().trim();
-        const checkedCats = Array.from(document.querySelectorAll('input[name="category"]:checked')).map(i => i.value);
-        const checkedConds = Array.from(document.querySelectorAll('input[name="condition"]:checked')).map(i => i.value);
+        const search    = document.getElementById("search-input").value.toLowerCase().trim();
+        const checkedCats  = [...document.querySelectorAll('input[name="category"]:checked')].map(i => i.value);
+        const checkedConds = [...document.querySelectorAll('input[name="condition"]:checked')].map(i => i.value);
 
-        let visible = 0;
-        allCards.forEach(card => {
-          const title = card.querySelector('.book-title').textContent.toLowerCase();
-          const author = card.querySelector('.book-author').textContent.toLowerCase();
-          const cat = card.dataset.category;
-          const cond = card.dataset.condition;
-
-          const matchSearch = !search || title.includes(search) || author.includes(search);
-          const matchCat = checkedCats.length === 0 || checkedCats.includes(cat);
-          const matchCond = checkedConds.length === 0 || checkedConds.includes(cond);
-
-          if (matchSearch && matchCat && matchCond) {
-            card.style.display = '';
-            visible++;
-          } else {
-            card.style.display = 'none';
-          }
+        const filtered = allBooks.filter(b => {
+          const matchSearch = !search
+            || b.title?.toLowerCase().includes(search)
+            || b.author?.toLowerCase().includes(search);
+          const matchCat  = !checkedCats.length  || checkedCats.includes(b.category);
+          const matchCond = !checkedConds.length || checkedConds.includes(b.condition);
+          return matchSearch && matchCat && matchCond;
         });
 
-        document.getElementById('books-count').textContent = visible;
-        document.getElementById('empty-state').style.display = visible === 0 ? 'flex' : 'none';
+        countEl.textContent = filtered.length;
+        emptyState.style.display = filtered.length ? "none" : "flex";
+
+        grid.innerHTML = filtered.map(b => buildBookCard(b)).join("");
       }
 
-      document.getElementById('search-input').addEventListener('input', applyFilters);
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.addEventListener('change', applyFilters));
+      // ── Слухачі ───────────────────────────────────────────
+      document.getElementById("search-input").addEventListener("input", applyFilters);
+      document.querySelectorAll('input[type="checkbox"]').forEach(cb =>
+        cb.addEventListener("change", applyFilters)
+      );
+      document.getElementById("filters-toggle").addEventListener("click", () =>
+        document.getElementById("filters-sidebar").classList.toggle("open")
+      );
 
-      // Мобільний тогл фільтрів
-      document.getElementById('filters-toggle').addEventListener('click', () => {
-        document.getElementById('filters-sidebar').classList.toggle('open');
-      });
-
-      updateCounts();
+      loadBooks();
     </script>
   </body>
 </html>

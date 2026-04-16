@@ -9,33 +9,37 @@ const __dirname = path.dirname(__filename);
 
 export async function openDB() {
   return open({
-    filename: path.join(__dirname, "books.db"),
+    filename: path.join(__dirname, "bookshare.db"),
     driver: sqlite3.Database,
   });
 }
 
-// Ініціалізація таблиць, якщо їх нема
 export async function initDB() {
   const db = await openDB();
 
   await db.exec(`
-    CREATE TABLE IF NOT EXISTS books (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      title TEXT NOT NULL,
-      author TEXT,
-      category TEXT,
-      condition TEXT,
-      added_by TEXT,
-      cover TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    CREATE TABLE IF NOT EXISTS users (
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      name          TEXT    NOT NULL,
+      email         TEXT    NOT NULL UNIQUE,
+      password_hash TEXT    NOT NULL,
+      exchanged     INTEGER DEFAULT 0,
+      rating        REAL    DEFAULT 5.0,
+      created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
 
   await db.exec(`
-    CREATE TABLE IF NOT EXISTS users (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT,
-      email TEXT
+    CREATE TABLE IF NOT EXISTS books (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      title       TEXT    NOT NULL,
+      author      TEXT,
+      category    TEXT,
+      condition   TEXT,
+      description TEXT,
+      cover       TEXT,
+      owner_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      created_at  DATETIME DEFAULT CURRENT_TIMESTAMP
     )
   `);
 

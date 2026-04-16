@@ -262,58 +262,106 @@
       </div>
     </footer>
 
-    <script>
-      // Лічильник символів
-      const textarea = document.getElementById("book-desc");
-      const counter = document.getElementById("char-count");
-      const submitBtn = document.getElementById("submit-btn");
+  <!-- Вставити цей <script type="module"> замість існуючого <script> в add-book.html -->
+<script type="module">
+  import { auth, booksApi } from "./js/api.js";
+  import "./js/main.js";
 
-      textarea.addEventListener("input", () => {
-        const len = textarea.value.length;
-        counter.textContent = len;
-        const counterWrap = counter.closest(".char-counter");
-        if (len >= 20) {
-          counterWrap.classList.add("valid");
-        } else {
-          counterWrap.classList.remove("valid");
-        }
-      });
+  // Захист — тільки для залогованих
+  if (!auth.requireAuth()) throw new Error("redirect");
 
-      // Валідація форми
-      submitBtn.addEventListener("click", (e) => {
-        e.preventDefault();
-        const title = document.getElementById("book-title").value.trim();
-        const author = document.getElementById("book-author").value.trim();
-        const category = document.getElementById("book-category").value;
-        const condition = document.getElementById("book-condition").value;
-        const desc = textarea.value.trim();
+  const user = auth.getUser();
 
-        const fields = [
-          { el: document.getElementById("book-title"), val: title },
-          { el: document.getElementById("book-author"), val: author },
-          { el: document.getElementById("book-category"), val: category },
-          { el: document.getElementById("book-condition"), val: condition },
-          { el: textarea, val: desc },
-        ];
+  // ── Режим редагування ──────────────────────────────────────
+  const params = new URLSearchParams(window.location.search);
+  const editId = params.get("edit");
 
-        let valid = true;
-        fields.forEach(({ el, val }) => {
-          el.classList.remove("input-error");
-          if (!val || (el === textarea && val.length < 20)) {
-            el.classList.add("input-error");
-            valid = false;
-          }
-        });
+  if (editId) {
+    document.querySelector(".add-book-hero h1").textContent = "Редагувати книгу";
+    document.querySelector(".add-book-hero p").textContent  = "Оновіть інформацію про книгу";
+    document.getElementById("submit-btn").innerHTML =
+      `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/>
+       </svg> Зберегти зміни`;
 
-        if (valid) {
-          submitBtn.textContent = "Збережено!";
-          submitBtn.style.background = "#00945e";
-          setTimeout(() => {
-            submitBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Додати книгу`;
-            submitBtn.style.background = "";
-          }, 2000);
-        }
-      });
-    </script>
+    // Завантажуємо дані книги
+    try {
+      const book = await booksApi.getById(editId);
+      document.getElementById("book-title").value    = book.title    || "";
+      document.getElementById("book-author").value   = book.author   || "";
+      document.getElementById("book-category").value = book.category || "";
+      document.getElementById("book-condition").value= book.condition|| "";
+      document.getElementById("book-desc").value     = book.description || "";
+      // Оновлюємо лічильник символів
+      const len = (book.description || "").length;
+      document.getElementById("char-count").textContent = len;
+      if (len >= 20) document.querySelector(".char-counter").classList.add("valid");
+    } catch {
+      alert("Не вдалося завантажити книгу");
+    }
+  }
+
+  // ── Лічильник символів ─────────────────────────────────────
+  const textarea = document.getElementById("book-desc");
+  const counter  = document.getElementById("char-count");
+
+  textarea.addEventListener("input", () => {
+    const len = textarea.value.length;
+    counter.textContent = len;
+    const wrap = counter.closest(".char-counter");
+    wrap.classList.toggle("valid", len >= 20);
+  });
+
+  // ── Сабміт ────────────────────────────────────────────────
+  document.getElementById("submit-btn").addEventListener("click", async (e) => {
+    e.preventDefault();
+
+    const title     = document.getElementById("book-title").value.trim();
+    const author    = document.getElementById("book-author").value.trim();
+    const category  = document.getElementById("book-category").value;
+    const condition = document.getElementById("book-condition").value;
+    const desc      = textarea.value.trim();
+
+    const fields = [
+      { el: document.getElementById("book-title"),    val: title },
+      { el: document.getElementById("book-author"),   val: author },
+      { el: document.getElementById("book-category"), val: category },
+      { el: document.getElementById("book-condition"),val: condition },
+      { el: textarea,                                  val: desc },
+    ];
+
+    let valid = true;
+    fields.forEach(({ el, val }) => {
+      el.classList.remove("input-error");
+      if (!val || (el === textarea && val.length < 20)) {
+        el.classList.add("input-error");
+        valid = false;
+      }
+    });
+
+    if (!valid) return;
+
+    const btn = document.getElementById("submit-btn");
+    btn.disabled    = true;
+    btn.textContent = "Збереження...";
+
+    try {
+      const bookData = { title, author, category, condition, description: desc, owner_id: user.id };
+
+      if (editId) {
+        await booksApi.update(editId, bookData);
+      } else {
+        await booksApi.add(bookData);
+      }
+
+      window.location.href = "/profile.html";
+    } catch (err) {
+      alert("Помилка: " + err.message);
+      btn.disabled    = false;
+      btn.textContent = editId ? "Зберегти зміни" : "Додати книгу";
+    }
+  });
+</script>
   </body>
 </html>

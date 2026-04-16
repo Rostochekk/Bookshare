@@ -1,58 +1,171 @@
-// Файл: client/js/main.js
+// client/js/main.js
+import { auth, booksApi, buildBookCard, CATEGORY_LABELS } from "./api.js";
 
-// ============================
-//  Пошук
-// ============================
-function searchBooks() {
-  const query = document.getElementById("searchInput").value.trim();
-  if (!query) return;
-  // просто редірект на сторінку browse.html із параметром пошуку
-  window.location.href = `browse.html?search=${encodeURIComponent(query)}`;
+// ════════════════════════════════════════════════════════════
+//  Navbar dropdown (спільний для всіх сторінок)
+// ════════════════════════════════════════════════════════════
+
+function initNavbar() {
+  const profileIcon = document.querySelector(".profile-icon");
+  if (!profileIcon) return;
+
+  // Створюємо dropdown
+  const dropdown = document.createElement("div");
+  dropdown.className = "nav-dropdown";
+
+  const user = auth.getUser();
+
+  if (user) {
+    dropdown.innerHTML = `
+      <div class="nav-dropdown-user">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+        <span>${user.name}</span>
+      </div>
+      <div class="nav-dropdown-divider"></div>
+      <a href="/profile.html" class="nav-dropdown-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+        Мій профіль
+      </a>
+      <a href="/chat.html" class="nav-dropdown-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        Мої чати
+      </a>
+      <a href="/add-book.html" class="nav-dropdown-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        Додати книгу
+      </a>
+      <div class="nav-dropdown-divider"></div>
+      <button class="nav-dropdown-item nav-dropdown-logout" id="logoutBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Вийти
+      </button>
+    `;
+  } else {
+    dropdown.innerHTML = `
+      <a href="/login.html" class="nav-dropdown-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        Увійти
+      </a>
+      <a href="/reg.html" class="nav-dropdown-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+          <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+        </svg>
+        Зареєструватись
+      </a>
+    `;
+  }
+
+  // Вставляємо dropdown поруч з .profile-icon
+  profileIcon.style.position = "relative";
+  const wrapper = document.createElement("div");
+  wrapper.className = "nav-profile-wrap";
+  profileIcon.parentNode.insertBefore(wrapper, profileIcon);
+  wrapper.appendChild(profileIcon);
+  wrapper.appendChild(dropdown);
+
+  // Toggle
+  profileIcon.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle("open");
+  });
+
+  document.addEventListener("click", () => dropdown.classList.remove("open"));
+  dropdown.addEventListener("click", (e) => e.stopPropagation());
+
+  // Logout
+  const logoutBtn = dropdown.querySelector("#logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => auth.logout());
+  }
 }
 
-// ============================
-//  Завантаження статистики
-// ============================
+// ════════════════════════════════════════════════════════════
+//  Пошук (головна → browse з параметром)
+// ════════════════════════════════════════════════════════════
+
+window.searchBooks = function () {
+  const input = document.getElementById("searchInput");
+  const query = input?.value.trim();
+  if (!query) return;
+  window.location.href = `/browse.html?search=${encodeURIComponent(query)}`;
+};
+
+// Enter у полі пошуку
+const searchInput = document.getElementById("searchInput");
+if (searchInput) {
+  searchInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") window.searchBooks();
+  });
+}
+
+// ════════════════════════════════════════════════════════════
+//  Статистика (головна)
+// ════════════════════════════════════════════════════════════
+
 const statBooks = document.getElementById("statBooks");
 if (statBooks) {
-  fetch("/api/books/count")
-    .then(res => res.ok ? res.json() : { count: 0 })
-    .then(data => {
-      statBooks.textContent = data.count + "+";
-    })
-    .catch(() => (statBooks.textContent = "0+"));
+  booksApi.getCount()
+    .then(({ count }) => { statBooks.textContent = count + "+"; })
+    .catch(() => { statBooks.textContent = "0+"; });
 }
 
-// ============================
-//  Нещодавно додані книги
-// ============================
+// ════════════════════════════════════════════════════════════
+//  Нещодавно додані книги (головна)
+// ════════════════════════════════════════════════════════════
+
 const recentContainer = document.getElementById("recentBooks");
 if (recentContainer) {
-  fetch("/api/books/recent")
-    .then(res => res.ok ? res.json() : [])
-    .then(books => {
+  booksApi.getRecent()
+    .then((books) => {
       if (!books.length) {
         recentContainer.innerHTML =
-          "<p style='color:#666;text-align:center;'>Поки що тут немає книг.</p>";
+          "<p style='color:#666;text-align:center;grid-column:1/-1'>Поки що тут немає книг.</p>";
         return;
       }
-
-      recentContainer.innerHTML = books
-        .map(
-          (b) => `
-        <div class="book-card">
-          <img class="cover" src="${b.cover || "images/placeholder-cover.jpg"}" alt="${b.title}">
-          <h3>${b.title}</h3>
-          <p>${b.author}</p>
-          <span class="tag">${b.category || "Без категорії"}</span>
-        </div>
-      `
-        )
-        .join("");
+      recentContainer.innerHTML = books.map(b => buildBookCard(b)).join("");
     })
-    .catch((err) => {
-      console.error("Помилка завантаження книг:", err);
+    .catch(() => {
       recentContainer.innerHTML =
-        "<p style='color:#c00;text-align:center;'>Не вдалося завантажити книги.</p>";
+        "<p style='color:#c00;text-align:center;grid-column:1/-1'>Не вдалося завантажити книги.</p>";
     });
 }
+
+// ════════════════════════════════════════════════════════════
+//  Лічильники категорій (головна)
+// ════════════════════════════════════════════════════════════
+
+const catCountEls = document.querySelectorAll(".cat-count[data-category]");
+if (catCountEls.length) {
+  booksApi.getCategories()
+    .then((cats) => {
+      const map = Object.fromEntries(cats.map(c => [c.name, c.count]));
+      catCountEls.forEach(el => {
+        const slug = el.dataset.category;
+        const count = map[slug] || 0;
+        el.textContent = `${count} ${count === 1 ? "книга" : "книги"}`;
+      });
+    })
+    .catch(() => {});
+}
+
+// ════════════════════════════════════════════════════════════
+//  Ініціалізація
+// ════════════════════════════════════════════════════════════
+
+initNavbar();

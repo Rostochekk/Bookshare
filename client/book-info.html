@@ -281,24 +281,95 @@
       </div>
     </footer>
 
-    <script>
-      /**
-       * TODO: При підключенні бекенду замінити статичний вміст на:
-       *
-       * const params = new URLSearchParams(window.location.search);
-       * const bookId = params.get('id');
-       *
-       * fetch(`/api/books/${bookId}`)
-       *   .then(r => r.json())
-       *   .then(book => {
-       *     document.getElementById('bookTitle').textContent = book.title;
-       *     document.getElementById('bookAuthor').textContent = book.author;
-       *     document.getElementById('bookDesc').textContent = book.description;
-       *     document.getElementById('bookCover').src = book.cover;
-       *     document.getElementById('contactBtn').href = `chat.html?user=${book.ownerId}&book=${book.id}`;
-       *     // ... і так далі
-       *   });
-       */
-    </script>
+   <!-- Вставити цей <script type="module"> замість TODO-коментаря в book-info.html -->
+<script type="module">
+  import { auth, booksApi, CATEGORY_LABELS, CONDITION_LABELS, buildBookCard } from "./js/api.js";
+  import "./js/main.js";
+
+  const params = new URLSearchParams(window.location.search);
+  const bookId = params.get("id");
+
+  if (!bookId) {
+    window.location.href = "/browse.html";
+    throw new Error("no id");
+  }
+
+  async function loadBook() {
+    try {
+      const book = await booksApi.getById(bookId);
+      render(book);
+
+      // Схожі книги
+      const related = await booksApi.getRelated(bookId);
+      renderRelated(related);
+    } catch {
+      document.querySelector(".bookinfo-main").innerHTML =
+        "<p style='text-align:center;padding:60px;color:#c00'>Книгу не знайдено.</p>";
+    }
+  }
+
+  function render(b) {
+    const catLabel  = CATEGORY_LABELS[b.category]  || b.category  || "—";
+    const condClass = b.condition ? `condition-${b.condition}` : "";
+    const condLabel = CONDITION_LABELS[b.condition] || b.condition || "—";
+    const cover     = b.cover || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=340&h=440&fit=crop";
+    const date      = b.created_at
+      ? new Date(b.created_at).toLocaleDateString("uk-UA", { day: "numeric", month: "long", year: "numeric" })
+      : "—";
+    const owner     = b.owner_name || "—";
+
+    // Обкладинка
+    document.getElementById("bookCover").src = cover;
+    document.getElementById("bookCover").alt = b.title;
+
+    // Бейджи
+    document.querySelector(".bookinfo-badges").innerHTML = `
+      <span class="category-badge">${catLabel}</span>
+      <span class="condition-badge ${condClass}">${condLabel}</span>
+    `;
+
+    // Заголовок / автор
+    document.getElementById("bookTitle").textContent  = b.title;
+    document.getElementById("bookAuthor").textContent = b.author || "";
+
+    // Хлібні крихти
+    document.querySelector(".breadcrumb span").textContent = b.title;
+
+    // Мета
+    const metaRows = document.querySelectorAll(".bookinfo-meta-row span:last-child");
+    if (metaRows[0]) metaRows[0].textContent = date;            // Додано
+    if (metaRows[2]) metaRows[2].textContent = "";              // Кількість сторінок — з БД немає
+    if (metaRows[3]) metaRows[3].textContent = "";              // Мова — з БД немає
+
+    // Опис
+    document.getElementById("bookDesc").textContent = b.description || "Опис відсутній.";
+
+    // Власник
+    document.querySelector(".owner-name").textContent = owner;
+    document.querySelector(".owner-avatar").src =
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(owner)}&background=00a870&color=fff&size=56`;
+
+    // Кнопки чату — перевірка авторизації
+    document.querySelectorAll(".contact-owner-btn, .btn-edit[href*='chat']").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        if (!auth.isLoggedIn()) {
+          e.preventDefault();
+          window.location.href = "/login.html";
+        }
+      });
+    });
+  }
+
+  function renderRelated(books) {
+    const container = document.getElementById("relatedBooks");
+    if (!books.length) {
+      container.innerHTML = "<p style='color:#aaa'>Схожих книг поки немає.</p>";
+      return;
+    }
+    container.innerHTML = books.map(b => buildBookCard(b)).join("");
+  }
+
+  loadBook();
+</script>
   </body>
 </html>
