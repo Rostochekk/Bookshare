@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookShare — Головна</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script defer src="js/main.js"></script>
+</head>
+
+<body>
+  <!-- ===================== НАВІГАЦІЯ ===================== -->
+  <header class="navbar">
+    <a href="index.html" class="logo">
+      <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#00a870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#00a870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      BookShare
+    </a>
+
+    <nav>
+      <a href="index.html" class="active">Головна</a>
+      <a href="browse.html">Переглянути книги</a>
+      <a href="profile.html">Мої книги</a>
+    </nav>
+
+    <div class="nav-right">
+      <a href="add-book.html" class="add-book-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <line x1="12" y1="8" x2="12" y2="16"/>
+          <line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        Додати книгу
+      </a>
+      <a href="profile.html" class="profile-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- ===================== HERO ===================== -->
+  <section class="hero">
+    <h1>Ласкаво просимо до <span class="highlight">BookShare</span></h1>
+    <p>Діліться, позичайте та обмінюйтесь книгами з іншими студентами.<br>Накопичуйте знання, заощаджуйте гроші та будуйте спільноту.</p>
+
+    <div class="search-box">
+      <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      <input id="searchInput" type="text" placeholder="Пошук за назвою або автором...">
+      <button onclick="searchBooks()">Пошук</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-icon-wrap">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00a870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <h3 id="statBooks">8+</h3>
+        <p>Доступних книг</p>
+      </div>
+      <div class="stat">
+        <div class="stat-icon-wrap">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00a870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+        </div>
+        <h3>150+</h3>
+        <p>Активних студентів</p>
+      </div>
+      <div class="stat">
+        <div class="stat-icon-wrap">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#00a870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="1 4 1 10 7 10"/>
+            <polyline points="23 20 23 14 17 14"/>
+            <path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+          </svg>
+        </div>
+        <h3>200+</h3>
+        <p>Книг обміняно</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== ПЕРЕГЛЯД ЗА КАТЕГОРІЯМИ ===================== -->
+  <section class="categories-section">
+    <div class="section-header">
+      <h2>Перегляд за категоріями</h2>
+    </div>
+
+    <div class="category-grid" id="categoryGrid">
+      <!-- Генерується через main.js або статично -->
+      <div class="category-card" onclick="location.href='browse.html?category=educational'">
+        <div class="cat-icon-wrap">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00a870" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <h3>Освітні</h3>
+        <p class="cat-count" data-category="educational">1 книга</p>
+      </div>
+
+      <div class="category-card" onclick="location.href='browse.html?category=fiction'">
+        <div class="cat-icon-wrap">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00a870" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <h3>Художня</h3>
+        <p class="cat-count" data-category="fiction">1 книга</p>
+      </div>
+
+      <div class="category-card" onclick="location.href='browse.html?category=technical'">
+        <div class="cat-icon-wrap">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00a870" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <h3>Технічна</h3>
+        <p class="cat-count" data-category="technical">1 книга</p>
+      </div>
+
+      <div class="category-card" onclick="location.href='browse.html?category=science'">
+        <div class="cat-icon-wrap">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00a870" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <h3>Наукова</h3>
+        <p class="cat-count" data-category="science">1 книга</p>
+      </div>
+
+      <div class="category-card" onclick="location.href='browse.html?category=literature'">
+        <div class="cat-icon-wrap">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00a870" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <h3>Література</h3>
+        <p class="cat-count" data-category="literature">1 книга</p>
+      </div>
+
+      <div class="category-card" onclick="location.href='browse.html?category=history'">
+        <div class="cat-icon-wrap">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00a870" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <h3>Історія</h3>
+        <p class="cat-count" data-category="history">1 книга</p>
+      </div>
+
+      <div class="category-card" onclick="location.href='browse.html?category=mathematics'">
+        <div class="cat-icon-wrap">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00a870" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <h3>Математика</h3>
+        <p class="cat-count" data-category="mathematics">1 книга</p>
+      </div>
+
+      <div class="category-card" onclick="location.href='browse.html?category=programming'">
+        <div class="cat-icon-wrap">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00a870" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </div>
+        <h3>Програмування</h3>
+        <p class="cat-count" data-category="programming">1 книга</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== НЕЩОДАВНО ДОДАНІ ===================== -->
+  <section class="recent">
+    <div class="title-box">
+      <div class="title-box-left">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00a870" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;">
+          <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+          <polyline points="17 6 23 6 23 12"/>
+        </svg>
+        <h2>Нещодавно додані книги</h2>
+      </div>
+      <a href="browse.html" class="view-all-btn">Переглянути всі</a>
+    </div>
+
+    <div id="recentBooks" class="recent-grid">
+      <!-- Книги підвантажуються через main.js -->
+    </div>
+  </section>
+
+  <!-- ===================== ФУТЕР ===================== -->
+  <footer class="footer">
+    <div class="footer-container">
+
+      <!-- Колонка 1: лого + соцмережі -->
+      <div class="footer-col">
+        <div class="footer-logo">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#00a870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#00a870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3>BookShare</h3>
+        </div>
+        <p style="margin-bottom:18px;">Об'єднуємо студентів через силу спільних знань. Обмінюйтесь книгами, заощаджуйте гроші, будуйте спільноту.</p>
+        <div class="socials">
+          <a href="#" class="social-btn" aria-label="Twitter">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg>
+          </a>
+          <a href="#" class="social-btn" aria-label="GitHub">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          </a>
+          <a href="#" class="social-btn" aria-label="LinkedIn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Колонка 2: швидкі посилання -->
+      <div class="footer-col">
+        <h4>Швидкі посилання</h4>
+        <div class="footer-links">
+          <a href="index.html">Головна</a>
+          <a href="browse.html">Переглянути книги</a>
+          <a href="add-book.html">Додати книгу</a>
+          <a href="profile.html">Мій профіль</a>
+        </div>
+      </div>
+
+      <!-- Колонка 3: категорії -->
+      <div class="footer-col">
+        <h4>Категорії</h4>
+        <div class="footer-links">
+          <a href="browse.html?category=educational">Освітні</a>
+          <a href="browse.html?category=fiction">Художня</a>
+          <a href="browse.html?category=technical">Технічна</a>
+          <a href="browse.html?category=programming">Програмування</a>
+        </div>
+      </div>
+
+      <!-- Колонка 4: контакти -->
+      <div class="footer-col">
+        <h4>Зв'яжіться з нами</h4>
+        <p style="margin-bottom:10px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px;">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+          support@bookshare.edu
+        </p>
+        <p style="color:#aab0bc;">Понеділок — П'ятниця<br/>9:00 — 17:00</p>
+      </div>
+
+    </div>
+
+    <hr />
+
+    <div class="footer-bottom">
+      <span>© 2026 BookShare. Всі права захищено.</span>
+      <span>Зроблено з <span class="heart">♥</span> для студентів</span>
+    </div>
+  </footer>
+
+</body>
+</html>
