@@ -1,102 +1,131 @@
 // server/routes/users.js
 import express from "express";
-import bcrypt from "bcrypt";
+import multer  from "multer";
+import path    from "path";
+import fs      from "fs";
+import bcrypt  from "bcrypt";
+import { fileURLToPath } from "url";
 import { openDB } from "../db.js";
 
 const router = express.Router();
-const SALT_ROUNDS = 12;
 
-// ─── Реєстрація ───────────────────────────────────────────────
-// POST /api/users/register
-// Body: { name, email, password }
+const __filename = fileURLToPath(import.meta.url);
+const __dirname  = path.dirname(__filename);
+
+// ── Папка для аватарів ────────────────────────────────────
+const AVATARS_DIR = path.join(__dirname, "../../client/uploads/avatars");
+if (!fs.existsSync(AVATARS_DIR)) fs.mkdirSync(AVATARS_DIR, { recursive: true });
+
+const avatarStorage = multer.diskStorage({
+  destination: (_req, _file, cb) => cb(null, AVATARS_DIR),
+  filename:    (_req,  file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `avatar_${Date.now()}${ext}`);
+  },
+});
+
+const uploadAvatar = multer({
+  storage: avatarStorage,
+  limits: { fileSize: 3 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => cb(null, file.mimetype.startsWith("image/")),
+});
+
+// ════════════════════════════════════════════════════════════
+//  POST /api/users/register
+// ════════════════════════════════════════════════════════════
 router.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
   if (!name || !email || !password)
-    return res.status(400).json({ error: "Усі поля обов'язкові" });
-
+    return res.status(400).json({ error: "Всі поля обов'язкові" });
   if (password.length < 6)
     return res.status(400).json({ error: "Пароль мінімум 6 символів" });
 
-  try {
-    const db = await openDB();
+  const db = await openDB();
+  const existing = await db.get("SELECT id FROM users WHERE email = ?", [email]);
+  if (existing)
+    return res.status(409).json({ error: "Email вже використовується" });
 
-    const existing = await db.get("SELECT id FROM users WHERE email = ?", [email]);
-    if (existing)
-      return res.status(409).json({ error: "Email вже використовується" });
+  const password_hash = await bcrypt.hash(password, 10);
+  const result = await db.run(
+    "INSERT INTO users (name, email, password_hash, avatar) VALUES (?, ?, ?, NULL)",
+    [name, email, password_hash]
+  );
 
-    const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
-    const result = await db.run(
-      "INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)",
-      [name, email, password_hash]
-    );
-
-    const user = await db.get(
-      "SELECT id, name, email, exchanged, rating FROM users WHERE id = ?",
-      [result.lastID]
-    );
-    res.status(201).json({ message: "Зареєстровано", user });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Помилка сервера" });
-  }
+  const user = await db.get(
+    "SELECT id, name, email, avatar FROM users WHERE id = ?",
+    [result.lastID]
+  );
+  res.status(201).json({ message: "Реєстрація успішна", user });
 });
 
-// ─── Вхід ─────────────────────────────────────────────────────
-// POST /api/users/login
-// Body: { email, password }
+// ════════════════════════════════════════════════════════════
+//  POST /api/users/login
+// ════════════════════════════════════════════════════════════
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password)
-    return res.status(400).json({ error: "Email і пароль обов'язкові" });
+    return res.status(400).json({ error: "Email та пароль обов'язкові" });
 
-  try {
-    const db = await openDB();
-    const user = await db.get("SELECT * FROM users WHERE email = ?", [email]);
+  const db   = await openDB();
+  const user = await db.get(
+    "SELECT id, name, email, avatar, password_hash FROM users WHERE email = ?",
+    [email]
+  );
 
-    if (!user)
-      return res.status(401).json({ error: "Невірний email або пароль" });
+  if (!user)
+    return res.status(401).json({ error: "Невірний email або пароль" });
 
-    const match = await bcrypt.compare(password, user.password_hash);
-    if (!match)
-      return res.status(401).json({ error: "Невірний email або пароль" });
+  const ok = await bcrypt.compare(password, user.password_hash);
+  if (!ok)
+    return res.status(401).json({ error: "Невірний email або пароль" });
 
-    // Повертаємо дані без хешу пароля
-    const { password_hash, ...safeUser } = user;
-    res.json({ message: "Успішний вхід", user: safeUser });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Помилка сервера" });
-  }
+  const { password_hash: _, ...safeUser } = user;
+  res.json({ message: "Вхід успішний", user: safeUser });
 });
 
-// ─── Поточний користувач (по id з query або body) ─────────────
-// GET /api/users/me?id=5
+// ════════════════════════════════════════════════════════════
+//  GET /api/users/me?id=5
+// ════════════════════════════════════════════════════════════
 router.get("/me", async (req, res) => {
   const { id } = req.query;
   if (!id) return res.status(400).json({ error: "id обов'язковий" });
 
-  try {
-    const db = await openDB();
-    const user = await db.get(
-      "SELECT id, name, email, exchanged, rating, created_at FROM users WHERE id = ?",
-      [id]
-    );
-    if (!user) return res.status(404).json({ error: "Користувача не знайдено" });
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: "Помилка сервера" });
-  }
+  const db   = await openDB();
+  const user = await db.get(
+    "SELECT id, name, email, avatar FROM users WHERE id = ?", [id]
+  );
+  if (!user) return res.status(404).json({ error: "Користувача не знайдено" });
+  res.json(user);
 });
 
-// ─── Список усіх (адмін / дебаг) ──────────────────────────────
-router.get("/", async (req, res) => {
+// ════════════════════════════════════════════════════════════
+//  POST /api/users/avatar
+//  FormData: { avatar: File, user_id: number }
+// ════════════════════════════════════════════════════════════
+router.post("/avatar", uploadAvatar.single("avatar"), async (req, res) => {
+  if (!req.file)
+    return res.status(400).json({ error: "Файл не отримано" });
+
+  const { user_id } = req.body;
+  if (!user_id)
+    return res.status(400).json({ error: "user_id обов'язковий" });
+
+  const avatarUrl = `/uploads/avatars/${req.file.filename}`;
   const db = await openDB();
-  const users = await db.all(
-    "SELECT id, name, email, exchanged, rating, created_at FROM users"
-  );
-  res.json(users);
+
+  // Видаляємо старий аватар з диску
+  const old = await db.get("SELECT avatar FROM users WHERE id = ?", [user_id]);
+  if (old?.avatar) {
+    const oldPath = path.join(__dirname, "../../client", old.avatar);
+    if (fs.existsSync(oldPath)) {
+      try { fs.unlinkSync(oldPath); } catch {}
+    }
+  }
+
+  await db.run("UPDATE users SET avatar = ? WHERE id = ?", [avatarUrl, user_id]);
+  res.json({ avatar: avatarUrl });
 });
 
 export default router;

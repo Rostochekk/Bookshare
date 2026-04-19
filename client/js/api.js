@@ -1,7 +1,6 @@
 // client/js/api.js
 // ──────────────────────────────────────────────────────────────
 //  Єдиний клієнтський API-модуль
-//  Використовується на всіх сторінках
 // ──────────────────────────────────────────────────────────────
 
 const BASE = "/api";
@@ -11,17 +10,24 @@ async function request(url, options = {}) {
     headers: { "Content-Type": "application/json" },
     ...options,
   });
+
+  // ✅ Перевіряємо що відповідь є JSON перш ніж парсити
+  const contentType = res.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) {
+    const text = await res.text();
+    throw new Error(`Сервер повернув не JSON: ${res.status} — ${text.slice(0, 100)}`);
+  }
+
   const data = await res.json();
   if (!res.ok) throw new Error(data.error || "Помилка запиту");
   return data;
 }
 
 // ════════════════════════════════════════════════════════════
-//  AUTH helpers (localStorage-based, без сесій на сервері)
+//  AUTH
 // ════════════════════════════════════════════════════════════
 
 export const auth = {
-  /** Повертає об'єкт { id, name, email, ... } або null */
   getUser() {
     try {
       return JSON.parse(localStorage.getItem("bs_user")) || null;
@@ -36,17 +42,17 @@ export const auth = {
 
   logout() {
     localStorage.removeItem("bs_user");
-    window.location.href = "/login.html";
+    // ✅ Відносний шлях — працює і на localhost і на сервері
+    window.location.href = "login.html";
   },
 
   isLoggedIn() {
     return Boolean(this.getUser());
   },
 
-  /** Редіректить на login якщо не залогований */
   requireAuth() {
     if (!this.isLoggedIn()) {
-      window.location.href = "/login.html";
+      window.location.href = "login.html";
       return false;
     }
     return true;
@@ -94,7 +100,6 @@ export const booksApi = {
     return request("/books/recent");
   },
 
-  /** @param {{ category?, condition?, search? }} filters */
   async getAll(filters = {}) {
     const params = new URLSearchParams();
     if (filters.category)  params.set("category",  filters.category);
@@ -143,19 +148,18 @@ export const booksApi = {
 };
 
 // ════════════════════════════════════════════════════════════
-//  Утиліти для карток книг
+//  Утиліти
 // ════════════════════════════════════════════════════════════
 
-// Мапи: англійський slug → українська назва
 export const CATEGORY_LABELS = {
-  educational:   "Навчальна",
-  fiction:       "Художня",
-  technical:     "Технічна",
-  science:       "Наукова",
-  literature:    "Література",
-  history:       "Історія",
-  mathematics:   "Математика",
-  programming:   "Програмування",
+  educational:  "Навчальна",
+  fiction:      "Художня",
+  technical:    "Технічна",
+  science:      "Наукова",
+  literature:   "Література",
+  history:      "Історія",
+  mathematics:  "Математика",
+  programming:  "Програмування",
 };
 
 export const CONDITION_LABELS = {
@@ -166,21 +170,18 @@ export const CONDITION_LABELS = {
   fair:       "Задовільний",
 };
 
-/** Будує HTML картки книги (для index та browse) */
-export function buildBookCard(book, requireLogin = false) {
+export function buildBookCard(book) {
   const catLabel  = CATEGORY_LABELS[book.category]  || book.category  || "—";
   const condClass = book.condition ? `condition-${book.condition}` : "";
   const condLabel = CONDITION_LABELS[book.condition] || book.condition || "—";
-  const cover     = book.cover || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=280&fit=crop";
+  const cover     = book.cover
+    || "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=280&fit=crop";
   const owner     = book.owner_name || "—";
-
-  const href = requireLogin
-    ? `javascript:void(0)" data-book-id="${book.id}" data-require-auth="1`
-    : `book-info.html?id=${book.id}`;
 
   return `
     <div class="book-card" onclick="openBook(${book.id})" data-id="${book.id}">
-      <img class="cover" src="${cover}" alt="${book.title}" onerror="this.src='https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=280&fit=crop'">
+      <img class="cover" src="${cover}" alt="${book.title}"
+        onerror="this.src='https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&h=280&fit=crop'">
       <div class="book-card-body">
         <div class="book-card-top">
           <h3 class="book-title">${book.title}</h3>
@@ -202,12 +203,14 @@ export function buildBookCard(book, requireLogin = false) {
   `;
 }
 
-/** Глобальний обробник кліку по картці — перевіряє авторизацію */
+// ✅ ВИПРАВЛЕНО: відносний шлях без ведучого /
+//    /book-info.html → не знаходить файл якщо сервер не на root
+//    book-info.html  → завжди відносно поточної директорії
 window.openBook = function(id) {
   const user = auth.getUser();
   if (!user) {
-    window.location.href = "/login.html";
+    window.location.href = "login.html";
     return;
   }
-  window.location.href = `/book-info.html?id=${id}`;
+  window.location.href = `book-info.html?id=${id}`;
 };

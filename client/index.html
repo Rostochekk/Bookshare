@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BookShare — Головна</title>
   <link rel="stylesheet" href="css/styles.css">
-  <script defer src="js/main.js"></script>
+  <script type="module" src="js/main.js"></script>
 </head>
 
 <body>
@@ -34,12 +34,13 @@
         </svg>
         Додати книгу
       </a>
-      <a href="profile.html" class="profile-icon">
+      <!-- profile-icon — тепер button, dropdown вставляється через main.js -->
+      <button class="profile-icon" aria-label="Профіль">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
           <circle cx="12" cy="7" r="4"/>
         </svg>
-      </a>
+      </button>
     </div>
   </header>
 
@@ -54,7 +55,7 @@
         <line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
       <input id="searchInput" type="text" placeholder="Пошук за назвою або автором...">
-      <button onclick="searchBooks()">Пошук</button>
+      <button id="searchBtn">Пошук</button>
     </div>
 
     <div class="stats">
@@ -65,7 +66,7 @@
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
           </svg>
         </div>
-        <h3 id="statBooks">8+</h3>
+        <h3 id="statBooks">—</h3>
         <p>Доступних книг</p>
       </div>
       <div class="stat">
@@ -101,7 +102,6 @@
     </div>
 
     <div class="category-grid" id="categoryGrid">
-      <!-- Генерується через main.js або статично -->
       <div class="category-card" onclick="location.href='browse.html?category=educational'">
         <div class="cat-icon-wrap">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#00a870" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -110,7 +110,7 @@
           </svg>
         </div>
         <h3>Освітні</h3>
-        <p class="cat-count" data-category="educational">1 книга</p>
+        <p class="cat-count" data-category="educational">—</p>
       </div>
 
       <div class="category-card" onclick="location.href='browse.html?category=fiction'">
@@ -121,7 +121,7 @@
           </svg>
         </div>
         <h3>Художня</h3>
-        <p class="cat-count" data-category="fiction">1 книга</p>
+        <p class="cat-count" data-category="fiction">—</p>
       </div>
 
       <div class="category-card" onclick="location.href='browse.html?category=technical'">
@@ -132,7 +132,7 @@
           </svg>
         </div>
         <h3>Технічна</h3>
-        <p class="cat-count" data-category="technical">1 книга</p>
+        <p class="cat-count" data-category="technical">—</p>
       </div>
 
       <div class="category-card" onclick="location.href='browse.html?category=science'">
@@ -143,7 +143,7 @@
           </svg>
         </div>
         <h3>Наукова</h3>
-        <p class="cat-count" data-category="science">1 книга</p>
+        <p class="cat-count" data-category="science">—</p>
       </div>
 
       <div class="category-card" onclick="location.href='browse.html?category=literature'">
@@ -154,7 +154,7 @@
           </svg>
         </div>
         <h3>Література</h3>
-        <p class="cat-count" data-category="literature">1 книга</p>
+        <p class="cat-count" data-category="literature">—</p>
       </div>
 
       <div class="category-card" onclick="location.href='browse.html?category=history'">
@@ -165,7 +165,7 @@
           </svg>
         </div>
         <h3>Історія</h3>
-        <p class="cat-count" data-category="history">1 книга</p>
+        <p class="cat-count" data-category="history">—</p>
       </div>
 
       <div class="category-card" onclick="location.href='browse.html?category=mathematics'">
@@ -176,7 +176,7 @@
           </svg>
         </div>
         <h3>Математика</h3>
-        <p class="cat-count" data-category="mathematics">1 книга</p>
+        <p class="cat-count" data-category="mathematics">—</p>
       </div>
 
       <div class="category-card" onclick="location.href='browse.html?category=programming'">
@@ -187,7 +187,7 @@
           </svg>
         </div>
         <h3>Програмування</h3>
-        <p class="cat-count" data-category="programming">1 книга</p>
+        <p class="cat-count" data-category="programming">—</p>
       </div>
     </div>
   </section>
@@ -206,7 +206,7 @@
     </div>
 
     <div id="recentBooks" class="recent-grid">
-      <!-- Книги підвантажуються через main.js -->
+      <!-- Завантажується через main.js -->
     </div>
   </section>
 
@@ -214,7 +214,6 @@
   <footer class="footer">
     <div class="footer-container">
 
-      <!-- Колонка 1: лого + соцмережі -->
       <div class="footer-col">
         <div class="footer-logo">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -237,7 +236,6 @@
         </div>
       </div>
 
-      <!-- Колонка 2: швидкі посилання -->
       <div class="footer-col">
         <h4>Швидкі посилання</h4>
         <div class="footer-links">
@@ -248,7 +246,6 @@
         </div>
       </div>
 
-      <!-- Колонка 3: категорії -->
       <div class="footer-col">
         <h4>Категорії</h4>
         <div class="footer-links">
@@ -259,7 +256,6 @@
         </div>
       </div>
 
-      <!-- Колонка 4: контакти -->
       <div class="footer-col">
         <h4>Зв'яжіться з нами</h4>
         <p style="margin-bottom:10px;">

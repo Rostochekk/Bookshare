@@ -1,15 +1,14 @@
 // client/js/main.js
-import { auth, booksApi, buildBookCard, CATEGORY_LABELS } from "./api.js";
+import { auth, booksApi, buildBookCard } from "./api.js";
 
 // ════════════════════════════════════════════════════════════
-//  Navbar dropdown (спільний для всіх сторінок)
+//  Navbar dropdown
 // ════════════════════════════════════════════════════════════
 
 function initNavbar() {
   const profileIcon = document.querySelector(".profile-icon");
   if (!profileIcon) return;
 
-  // Створюємо dropdown
   const dropdown = document.createElement("div");
   dropdown.className = "nav-dropdown";
 
@@ -30,17 +29,17 @@ function initNavbar() {
         </svg>
         Мій профіль
       </a>
-      <a href="/chat.html" class="nav-dropdown-item">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
-        </svg>
-        Мої чати
-      </a>
       <a href="/add-book.html" class="nav-dropdown-item">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
         </svg>
         Додати книгу
+      </a>
+      <a href="/chat.html" class="nav-dropdown-item">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/>
+        </svg>
+        Мої чати
       </a>
       <div class="nav-dropdown-divider"></div>
       <button class="nav-dropdown-item nav-dropdown-logout" id="logoutBtn">
@@ -71,15 +70,14 @@ function initNavbar() {
     `;
   }
 
-  // Вставляємо dropdown поруч з .profile-icon
-  profileIcon.style.position = "relative";
+  // Обгортка для позиціонування dropdown
   const wrapper = document.createElement("div");
   wrapper.className = "nav-profile-wrap";
   profileIcon.parentNode.insertBefore(wrapper, profileIcon);
   wrapper.appendChild(profileIcon);
   wrapper.appendChild(dropdown);
 
-  // Toggle
+  // Toggle відкриття/закриття
   profileIcon.addEventListener("click", (e) => {
     e.stopPropagation();
     dropdown.classList.toggle("open");
@@ -96,72 +94,102 @@ function initNavbar() {
 }
 
 // ════════════════════════════════════════════════════════════
-//  Пошук (головна → browse з параметром)
+//  Пошук — перекидає на browse з параметром ?search=
 // ════════════════════════════════════════════════════════════
 
-window.searchBooks = function () {
+function initSearch() {
   const input = document.getElementById("searchInput");
-  const query = input?.value.trim();
-  if (!query) return;
-  window.location.href = `/browse.html?search=${encodeURIComponent(query)}`;
-};
+  const btn   = document.getElementById("searchBtn");
+  if (!input) return;
 
-// Enter у полі пошуку
-const searchInput = document.getElementById("searchInput");
-if (searchInput) {
-  searchInput.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") window.searchBooks();
+  function doSearch() {
+    const query = input.value.trim();
+    if (!query) return;
+    window.location.href = `browse.html?search=${encodeURIComponent(query)}`;
+  }
+
+  btn?.addEventListener("click", doSearch);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") doSearch();
   });
 }
 
 // ════════════════════════════════════════════════════════════
-//  Статистика (головна)
+//  Статистика — кількість книг з БД
 // ════════════════════════════════════════════════════════════
 
-const statBooks = document.getElementById("statBooks");
-if (statBooks) {
+function initStats() {
+  const statBooks = document.getElementById("statBooks");
+  if (!statBooks) return;
+
   booksApi.getCount()
     .then(({ count }) => { statBooks.textContent = count + "+"; })
     .catch(() => { statBooks.textContent = "0+"; });
 }
 
 // ════════════════════════════════════════════════════════════
-//  Нещодавно додані книги (головна)
+//  Лічильники категорій з БД
 // ════════════════════════════════════════════════════════════
 
-const recentContainer = document.getElementById("recentBooks");
-if (recentContainer) {
-  booksApi.getRecent()
-    .then((books) => {
-      if (!books.length) {
-        recentContainer.innerHTML =
-          "<p style='color:#666;text-align:center;grid-column:1/-1'>Поки що тут немає книг.</p>";
-        return;
-      }
-      recentContainer.innerHTML = books.map(b => buildBookCard(b)).join("");
-    })
-    .catch(() => {
-      recentContainer.innerHTML =
-        "<p style='color:#c00;text-align:center;grid-column:1/-1'>Не вдалося завантажити книги.</p>";
-    });
-}
+function initCategoryCounters() {
+  const catCountEls = document.querySelectorAll(".cat-count[data-category]");
+  if (!catCountEls.length) return;
 
-// ════════════════════════════════════════════════════════════
-//  Лічильники категорій (головна)
-// ════════════════════════════════════════════════════════════
-
-const catCountEls = document.querySelectorAll(".cat-count[data-category]");
-if (catCountEls.length) {
   booksApi.getCategories()
     .then((cats) => {
       const map = Object.fromEntries(cats.map(c => [c.name, c.count]));
       catCountEls.forEach(el => {
-        const slug = el.dataset.category;
-        const count = map[slug] || 0;
-        el.textContent = `${count} ${count === 1 ? "книга" : "книги"}`;
+        const slug  = el.dataset.category;
+        const count = map[slug] ?? 0;
+        // Правильне відмінювання
+        let label;
+        if (count === 0)                          label = "Немає книг";
+        else if (count === 1)                     label = "1 книга";
+        else if (count >= 2 && count <= 4)        label = `${count} книги`;
+        else                                      label = `${count} книг`;
+        el.textContent = label;
       });
     })
-    .catch(() => {});
+    .catch(() => {
+      catCountEls.forEach(el => { el.textContent = "—"; });
+    });
+}
+
+// ════════════════════════════════════════════════════════════
+//  Нещодавно додані книги
+// ════════════════════════════════════════════════════════════
+
+function initRecentBooks() {
+  const container = document.getElementById("recentBooks");
+  if (!container) return;
+
+  // Скелетон-заглушка поки вантажиться
+  container.innerHTML = `
+    <div class="book-card-skeleton"></div>
+    <div class="book-card-skeleton"></div>
+    <div class="book-card-skeleton"></div>
+    <div class="book-card-skeleton"></div>
+  `;
+
+  booksApi.getRecent()
+    .then((books) => {
+      if (!books.length) {
+        container.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1">
+            <p>Поки що тут немає книг</p>
+            <span>Будьте першим — <a href="add-book.html" style="color:var(--green)">додайте книгу</a></span>
+          </div>`;
+        return;
+      }
+      // buildBookCard з api.js — клік через window.openBook
+      container.innerHTML = books.map(b => buildBookCard(b)).join("");
+    })
+    .catch(() => {
+      container.innerHTML = `
+        <p style="color:#c00;text-align:center;grid-column:1/-1;padding:40px 0">
+          Не вдалося завантажити книги. Спробуйте оновити сторінку.
+        </p>`;
+    });
 }
 
 // ════════════════════════════════════════════════════════════
@@ -169,3 +197,7 @@ if (catCountEls.length) {
 // ════════════════════════════════════════════════════════════
 
 initNavbar();
+initSearch();
+initStats();
+initCategoryCounters();
+initRecentBooks();

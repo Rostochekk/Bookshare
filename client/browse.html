@@ -8,10 +8,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body>
+
     <!-- ===================== НАВІГАЦІЯ ===================== -->
     <header class="navbar">
       <a href="index.html" class="logo">
-        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
           <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke="#00a870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke="#00a870" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -29,11 +30,12 @@
           </svg>
           Додати книгу
         </a>
-        <a href="profile.html" class="profile-icon">
+        <button class="profile-icon" aria-label="Профіль">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
           </svg>
-        </a>
+        </button>
       </div>
     </header>
 
@@ -45,7 +47,7 @@
         <p>Знайдіть <span id="books-count">0</span> книг, доступних для обміну</p>
       </section>
 
-      <!-- Пошук + фільтри -->
+      <!-- Тільки пошук, без кнопки фільтрів -->
       <div class="browse-toolbar">
         <div class="browse-search-box">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#aaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -53,19 +55,13 @@
           </svg>
           <input type="text" id="search-input" placeholder="Пошук за назвою або автором..." />
         </div>
-        <button class="filters-toggle-btn" id="filters-toggle">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="4" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="11" y1="18" x2="13" y2="18"/>
-          </svg>
-          Фільтри
-        </button>
+        <!-- кнопка "Фільтри" видалена -->
       </div>
 
       <!-- Сітка: сайдбар + книги -->
       <div class="browse-layout">
 
-        <!-- Сайдбар фільтрів -->
-        <!-- Значення value — англійські slug-и, що зберігаються в БД -->
+        <!-- Сайдбар фільтрів — завжди видимий, без toggle -->
         <aside class="filters-sidebar" id="filters-sidebar">
 
           <div class="filter-group">
@@ -145,16 +141,30 @@
 
         <!-- Сітка книг -->
         <div class="books-area">
+
+          <!-- Скелетон-лоадер поки книги вантажяться -->
           <div class="books-grid" id="books-grid">
-            <!-- Завантажується через JS -->
+            <div class="book-skeleton"></div>
+            <div class="book-skeleton"></div>
+            <div class="book-skeleton"></div>
+            <div class="book-skeleton"></div>
           </div>
+
           <div class="empty-state" id="empty-state" style="display:none;">
             <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
             </svg>
             <p>Книг не знайдено</p>
             <span>Спробуйте змінити фільтри або пошуковий запит</span>
           </div>
+
+          <!-- Блок помилки -->
+          <div id="error-state" style="display:none; text-align:center; padding:60px 20px; color:#c00;">
+            <p style="font-size:17px; font-weight:600; margin-bottom:8px;">Не вдалося завантажити книги</p>
+            <span style="font-size:14px; color:#999;" id="error-message"></span>
+          </div>
+
         </div>
       </div>
     </main>
@@ -221,17 +231,19 @@
     </footer>
 
     <script type="module">
-      import { auth, booksApi, buildBookCard, CATEGORY_LABELS, CONDITION_LABELS } from "./js/api.js";
-      import "./js/main.js"; // ініціалізує navbar dropdown
+      import { auth, booksApi, buildBookCard } from "./js/api.js";
+      import "./js/main.js";
 
       const grid       = document.getElementById("books-grid");
       const countEl    = document.getElementById("books-count");
       const emptyState = document.getElementById("empty-state");
+      const errorState = document.getElementById("error-state");
+      const errorMsg   = document.getElementById("error-message");
 
       let allBooks = [];
 
       // ── Зчитуємо початкові фільтри з URL ──────────────────
-      const urlParams = new URLSearchParams(window.location.search);
+      const urlParams   = new URLSearchParams(window.location.search);
       const urlCategory = urlParams.get("category");
       const urlSearch   = urlParams.get("search");
 
@@ -246,18 +258,42 @@
       // ── Завантажуємо всі книги ─────────────────────────────
       async function loadBooks() {
         try {
+          // Приховуємо помилку якщо була
+          errorState.style.display = "none";
+
           allBooks = await booksApi.getAll();
+
+          // ── Якщо сервер повернув не масив — логуємо ──────
+          if (!Array.isArray(allBooks)) {
+            console.error("booksApi.getAll() повернув не масив:", allBooks);
+            showError("Сервер повернув некоректні дані. Перевір консоль.");
+            return;
+          }
+
+          console.log(`Завантажено книг: ${allBooks.length}`);
+
           updateCounts();
           applyFilters();
+
         } catch (e) {
-          grid.innerHTML = "<p style='color:#c00;grid-column:1/-1;text-align:center'>Не вдалося завантажити книги.</p>";
+          console.error("Помилка завантаження книг:", e);
+          showError(e.message || "Невідома помилка");
         }
       }
 
-      // ── Лічильники по фільтрах ────────────────────────────
+      function showError(msg) {
+        grid.innerHTML = "";
+        errorMsg.textContent = msg;
+        errorState.style.display = "block";
+        emptyState.style.display = "none";
+        countEl.textContent = "0";
+      }
+
+      // ── Лічильники по категоріях/станах ──────────────────
       function updateCounts() {
         const catMap  = {};
         const condMap = {};
+
         allBooks.forEach(b => {
           if (b.category)  catMap[b.category]   = (catMap[b.category]  || 0) + 1;
           if (b.condition) condMap[b.condition]  = (condMap[b.condition]|| 0) + 1;
@@ -269,37 +305,68 @@
         });
       }
 
-      // ── Фільтрація ────────────────────────────────────────
+      // ── Фільтрація (клієнтська, по вже завантажених даних) ─
       function applyFilters() {
-        const search    = document.getElementById("search-input").value.toLowerCase().trim();
+        const search       = document.getElementById("search-input").value.toLowerCase().trim();
         const checkedCats  = [...document.querySelectorAll('input[name="category"]:checked')].map(i => i.value);
         const checkedConds = [...document.querySelectorAll('input[name="condition"]:checked')].map(i => i.value);
 
         const filtered = allBooks.filter(b => {
           const matchSearch = !search
-            || b.title?.toLowerCase().includes(search)
-            || b.author?.toLowerCase().includes(search);
+            || (b.title  || "").toLowerCase().includes(search)
+            || (b.author || "").toLowerCase().includes(search);
           const matchCat  = !checkedCats.length  || checkedCats.includes(b.category);
           const matchCond = !checkedConds.length || checkedConds.includes(b.condition);
           return matchSearch && matchCat && matchCond;
         });
 
         countEl.textContent = filtered.length;
-        emptyState.style.display = filtered.length ? "none" : "flex";
 
-        grid.innerHTML = filtered.map(b => buildBookCard(b)).join("");
+        const hasResults = filtered.length > 0;
+        emptyState.style.display = hasResults ? "none" : "flex";
+        errorState.style.display = "none";
+
+        grid.innerHTML = hasResults
+          ? filtered.map(b => buildBookCard(b)).join("")
+          : "";
       }
 
       // ── Слухачі ───────────────────────────────────────────
-      document.getElementById("search-input").addEventListener("input", applyFilters);
-      document.querySelectorAll('input[type="checkbox"]').forEach(cb =>
-        cb.addEventListener("change", applyFilters)
-      );
-      document.getElementById("filters-toggle").addEventListener("click", () =>
-        document.getElementById("filters-sidebar").classList.toggle("open")
-      );
+      document.getElementById("search-input")
+        .addEventListener("input", applyFilters);
 
+      document.querySelectorAll('input[type="checkbox"]')
+        .forEach(cb => cb.addEventListener("change", applyFilters));
+
+      // ── Старт ─────────────────────────────────────────────
       loadBooks();
     </script>
+
+    <style>
+      /* Скелетон-лоадер */
+      .book-skeleton {
+        background: #fff;
+        border-radius: 12px;
+        height: 300px;
+        animation: skeleton-pulse 1.4s ease-in-out infinite;
+      }
+      @keyframes skeleton-pulse {
+        0%, 100% { opacity: 1; }
+        50%       { opacity: 0.5; }
+      }
+
+      /* Сайдбар завжди видимий — прибираємо логіку toggle */
+      .filters-sidebar {
+        display: flex !important;
+      }
+
+      /* На мобільному — ховаємо сайдбар знову (вузькі екрани) */
+      @media (max-width: 900px) {
+        .filters-sidebar {
+          display: none !important;
+        }
+      }
+    </style>
+
   </body>
 </html>
