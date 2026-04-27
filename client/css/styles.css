@@ -3105,3 +3105,49 @@ button.profile-icon:hover {
   font-size: 15px;
   color: #bbb;
 }
+
+/* =========================
+   БЕЙДЖ НЕПРОЧИТАНИХ У NAVBAR
+========================= */
+
+/* Червона крапка на кнопці профілю */
+.nav-profile-dot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 10px;
+  height: 10px;
+  background: #e53935;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  pointer-events: none;
+}
+
+/* Щоб кнопка профілю мала position:relative для крапки */
+.profile-icon {
+  position: relative;
+}
+
+/* Бейдж у dropdown біля "Мої чати" */
+.nav-unread-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  background: #e53935;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 50px;
+  margin-left: auto;
+  line-height: 1;
+}
+
+/* Вирівнювання рядка "Мої чати" щоб бейдж був справа */
+.nav-chats-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

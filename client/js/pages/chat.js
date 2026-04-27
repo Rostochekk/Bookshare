@@ -29,6 +29,13 @@ const headerStatus  = document.getElementById("chatHeaderStatus");
 const bookPreview   = document.getElementById("chatBookPreview");
 const ratingBanner  = document.getElementById("ratingBanner");
 
+// ── Заглушка для порожнього стану шапки ─────────────────────
+const PLACEHOLDER_AVATAR = `https://ui-avatars.com/api/?name=?&background=e0e0e0&color=aaa&size=40`;
+
+if (headerAvatar) {
+  headerAvatar.src = PLACEHOLDER_AVATAR;
+}
+
 async function init() {
   await loadChatList();
 
@@ -111,23 +118,11 @@ window.openChat = async function(chatId) {
     const data = await chatsApi.getMessages(chatId, ME.id);
     const { chat, messages, show_rating } = data;
 
-    const otherId  = String(chat.buyer_id) === String(ME.id) ? chat.owner_id : chat.buyer_id;
-    const otherMsg = messages.find(m => String(m.sender_id) !== String(ME.id));
-    const currentOther = {
-      id:     otherId,
-      name:   otherMsg?.sender_name   || "Користувач",
-      avatar: otherMsg?.sender_avatar || `https://ui-avatars.com/api/?name=User&background=00a870&color=fff&size=40`,
-    };
-
     const chatMeta = await chatsApi.getChats(ME.id)
       .then(list => list.find(c => c.id === chatId))
       .catch(() => null);
 
-    if (chatMeta) {
-      currentOther.name   = chatMeta.other_name;
-      currentOther.avatar = chatMeta.other_avatar;
-      updateHeader(chatMeta);
-    }
+    if (chatMeta) updateHeader(chatMeta);
 
     renderAllMessages(messages);
     scrollToBottom();
@@ -140,12 +135,16 @@ window.openChat = async function(chatId) {
 };
 
 function updateHeader(chatMeta) {
-  headerName.textContent = chatMeta.other_name;
-  headerAvatar.src       = chatMeta.other_avatar;
-  headerAvatar.onerror   = () => {
-    headerAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(chatMeta.other_name)}&background=00a870&color=fff&size=40`;
-  };
-  headerStatus.innerHTML = `<span class="status-dot offline"></span> Учасник`;
+  if (headerName) headerName.textContent = chatMeta.other_name;
+  if (headerAvatar) {
+    headerAvatar.src = chatMeta.other_avatar || PLACEHOLDER_AVATAR;
+    headerAvatar.onerror = () => {
+      headerAvatar.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(chatMeta.other_name || "?")}&background=00a870&color=fff&size=40`;
+    };
+  }
+  if (headerStatus) headerStatus.innerHTML = `<span class="status-dot offline"></span> Учасник`;
+
+  if (!bookPreview) return;
 
   if (chatMeta.book_id && chatMeta.book_title) {
     bookPreview.style.display = "flex";
@@ -168,34 +167,39 @@ function updateHeader(chatMeta) {
   }
 }
 
+// ── Рендер усіх повідомлень (БЕЗ дублювання дати) ───────────
 function renderAllMessages(messages) {
   chatMessages.innerHTML = "";
-  let lastDate = null;
+  let lastDateStr = null;
+
   messages.forEach(m => {
-    const msgDate = new Date(m.created_at).toDateString();
-    if (msgDate !== lastDate) {
-      chatMessages.appendChild(makeDateDivider(m.created_at));
-      lastDate = msgDate;
+    const msgDateStr = new Date(m.created_at).toDateString();
+    if (msgDateStr !== lastDateStr) {
+      chatMessages.appendChild(makeDateDivider(m.created_at, msgDateStr));
+      lastDateStr = msgDateStr;
     }
     chatMessages.appendChild(buildMsgEl(m));
   });
 }
 
+// ── Додати одне повідомлення (БЕЗ дублювання дати) ──────────
 function appendMessage(m) {
-  const lastDivider = chatMessages.querySelector(".chat-date-divider:last-of-type");
-  const msgDate = new Date(m.created_at).toDateString();
-  if (!lastDivider || lastDivider.dataset.date !== msgDate) {
-    const divider = makeDateDivider(m.created_at);
-    divider.dataset.date = msgDate;
-    chatMessages.appendChild(divider);
+  const msgDateStr = new Date(m.created_at).toDateString();
+
+  // Шукаємо останній роздільник дати
+  const dividers = chatMessages.querySelectorAll(".chat-date-divider");
+  const lastDivider = dividers[dividers.length - 1];
+
+  if (!lastDivider || lastDivider.dataset.date !== msgDateStr) {
+    chatMessages.appendChild(makeDateDivider(m.created_at, msgDateStr));
   }
   chatMessages.appendChild(buildMsgEl(m));
 }
 
-function makeDateDivider(dateStr) {
+function makeDateDivider(dateStr, dateKey) {
   const div = document.createElement("div");
   div.className    = "chat-date-divider";
-  div.dataset.date = new Date(dateStr).toDateString();
+  div.dataset.date = dateKey || new Date(dateStr).toDateString();
   div.textContent  = formatDateLabel(dateStr);
   return div;
 }
@@ -235,7 +239,7 @@ function buildMsgEl(m) {
     `;
   } else {
     div.innerHTML = `
-      <img src="${m.sender_avatar}" alt="${m.sender_name}" class="chat-msg-avatar"
+      <img src="${m.sender_avatar || PLACEHOLDER_AVATAR}" alt="${m.sender_name}" class="chat-msg-avatar"
            onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(m.sender_name || "?")}&background=00a870&color=fff&size=32'">
       <div class="chat-msg-bubble">
         ${contentHtml}
@@ -299,6 +303,10 @@ function stopPolling() {
     clearInterval(pollingInterval);
     pollingInterval = null;
   }
+}
+
+function scrollToBottom() {
+  chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
 function updateChatListItem(chatId, msg) {
@@ -392,9 +400,5 @@ window.closeChatMobile = function() {
   stopPolling();
   currentChatId = null;
 };
-
-function scrollToBottom() {
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
 
 init();

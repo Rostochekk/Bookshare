@@ -30,11 +30,12 @@ export function initNavbar() {
         </svg>
         Додати книгу
       </a>
-      <a href="chat.html" class="nav-dropdown-item">
+      <a href="chat.html" class="nav-dropdown-item nav-chats-item">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
         </svg>
         Мої чати
+        <span class="nav-unread-badge" id="navUnreadBadge" style="display:none"></span>
       </a>
       <div class="nav-dropdown-divider"></div>
       <button class="nav-dropdown-item nav-dropdown-logout" id="logoutBtn">
@@ -82,5 +83,48 @@ export function initNavbar() {
   const logoutBtn = dropdown.querySelector("#logoutBtn");
   if (logoutBtn) {
     logoutBtn.addEventListener("click", () => auth.logout());
+  }
+
+  // ── Бейдж непрочитаних повідомлень ──────────────────────
+  if (user) {
+    loadUnreadCount(user.id);
+  }
+}
+
+async function loadUnreadCount(userId) {
+  try {
+    const res = await fetch(`/api/chats?user_id=${userId}`);
+    if (!res.ok) return;
+    const chats = await res.json();
+    const total = chats.reduce((sum, c) => sum + (c.unread_count || 0), 0);
+    updateUnreadBadge(total);
+  } catch {}
+}
+
+function updateUnreadBadge(count) {
+  // Бейдж у dropdown
+  const dropdownBadge = document.getElementById("navUnreadBadge");
+  if (dropdownBadge) {
+    if (count > 0) {
+      dropdownBadge.textContent = count > 99 ? "99+" : count;
+      dropdownBadge.style.display = "inline-flex";
+    } else {
+      dropdownBadge.style.display = "none";
+    }
+  }
+
+  // Бейдж на кнопці профілю (червона крапка)
+  const profileIcon = document.querySelector(".profile-icon");
+  if (profileIcon) {
+    let dot = profileIcon.querySelector(".nav-profile-dot");
+    if (count > 0) {
+      if (!dot) {
+        dot = document.createElement("span");
+        dot.className = "nav-profile-dot";
+        profileIcon.appendChild(dot);
+      }
+    } else {
+      dot?.remove();
+    }
   }
 }
