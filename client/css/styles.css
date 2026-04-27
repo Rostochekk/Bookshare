@@ -2947,3 +2947,161 @@ button.profile-icon:hover {
 .bs-modal__confirm:hover {
   background: #c62828;
 }
+
+/* =========================
+   CHAT — НОВІ СТИЛІ
+   Додати в кінець styles.css
+========================= */
+
+/* ── Обгортка поля вводу (preview + input row) ── */
+.chat-input-wrap {
+  flex-shrink: 0;
+  background: #fff;
+  border-top: 1px solid var(--gray-line);
+}
+
+/* ── Preview обраного фото ── */
+.chat-img-preview {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px 0;
+  position: relative;
+}
+
+.chat-img-preview img {
+  width: 72px;
+  height: 72px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1.5px solid var(--gray-line);
+  display: block;
+}
+
+.chat-img-preview button {
+  position: absolute;
+  top: 6px;
+  left: 72px;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+/* ── Картинка у повідомленні (звичайне фото) ── */
+.chat-msg-img {
+  max-width: 240px;
+  max-height: 200px;
+  border-radius: 10px;
+  display: block;
+  object-fit: cover;
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.chat-msg-img-link {
+  display: block;
+  line-height: 0;
+}
+
+/* ── Картка книги в системному повідомленні ── */
+.chat-msg-book-preview {
+  margin-bottom: 6px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1.5px solid rgba(0,168,112,0.2);
+}
+
+.chat-msg-book-preview img {
+  width: 100%;
+  max-width: 220px;
+  height: 120px;
+  object-fit: cover;
+  display: block;
+}
+
+/* Системне повідомлення трохи інший фон */
+.chat-msg.incoming .chat-msg-bubble:has(.chat-msg-book-preview) {
+  background: #f0fdf8;
+  border: 1px solid #c8f0dd;
+}
+
+/* ── Банер рейтингу ── */
+.chat-rating-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: linear-gradient(135deg, #edfaf4 0%, #d4f5e6 100%);
+  border-bottom: 1px solid #c8f0dd;
+  padding: 12px 20px;
+  flex-shrink: 0;
+  animation: slideDown 0.25s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.chat-rating-content p {
+  font-size: 14px;
+  font-weight: 600;
+  color: #00845a;
+  margin-bottom: 8px;
+}
+
+.chat-rating-stars {
+  display: flex;
+  gap: 6px;
+}
+
+.rating-star {
+  font-size: 26px;
+  color: #d1d5db;
+  cursor: pointer;
+  transition: color 0.15s, transform 0.1s;
+  line-height: 1;
+  user-select: none;
+}
+
+.rating-star:hover,
+.rating-star.active {
+  color: #f59e0b;
+  transform: scale(1.15);
+}
+
+.chat-rating-close {
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  color: #aaa;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  transition: color 0.15s;
+  align-self: flex-start;
+}
+
+.chat-rating-close:hover {
+  color: var(--text-main);
+}
+
+/* ── Loading стан ── */
+.chat-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  font-size: 15px;
+  color: #bbb;
+}

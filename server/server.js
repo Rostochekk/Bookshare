@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import { initDB } from "./db.js";
 import booksRouter from "./routes/books.js";
 import usersRouter from "./routes/users.js";
+import chatsRouter from "./routes/chats.js";
 
 const app  = express();
 const PORT = 3000;
@@ -18,25 +19,21 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ── Статичний фронтенд ────────────────────────────────────
+// ── Статика ───────────────────────────────────────────────
 app.use(express.static(path.join(__dirname, "../client")));
 
-// ── Завантажені файли (аватари, обкладинки) ───────────────
-// Доступні за: /uploads/avatars/filename.jpg
-//              /uploads/covers/filename.jpg
-app.use("/uploads", express.static(path.join(__dirname, "../client/uploads")));
-
-// ── API роути ─────────────────────────────────────────────
+// ── API ───────────────────────────────────────────────────
 app.use("/api/books", booksRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/chats", chatsRouter);
 
-// ── SPA fallback ─────────────────────────────────────────
+// ── SPA fallback ──────────────────────────────────────────
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "../client/index.html"));
 });
 
-// ── Старт ────────────────────────────────────────────────
+// ── Старт ─────────────────────────────────────────────────
 await initDB();
 app.listen(PORT, () => {
-  console.log(`✅ Сервер запущено: http://localhost:${PORT}`);
+  console.log(`✅ Сервер: http://localhost:${PORT}`);
 });

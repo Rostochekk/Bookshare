@@ -17,7 +17,7 @@ export async function openDB() {
 export async function initDB() {
   const db = await openDB();
 
-  // ── Таблиця користувачів ──────────────────────────────
+  // ── Користувачі ───────────────────────────────────────
   await db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -29,7 +29,7 @@ export async function initDB() {
     )
   `);
 
-  // ── Таблиця книг ──────────────────────────────────────
+  // ── Книги ─────────────────────────────────────────────
   await db.exec(`
     CREATE TABLE IF NOT EXISTS books (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -44,34 +44,63 @@ export async function initDB() {
     )
   `);
 
-  // ── Міграції (безпечно — не падає якщо колонка вже є) ─
-  await runMigrations(db);
+  // ── Чати ──────────────────────────────────────────────
+  // book_id   — книга про яку чат
+  // buyer_id  — хто написав першим
+  // owner_id  — власник книги
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS chats (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      book_id    INTEGER REFERENCES books(id) ON DELETE SET NULL,
+      buyer_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      owner_id   INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(book_id, buyer_id, owner_id)
+    )
+  `);
 
+  // ── Повідомлення ──────────────────────────────────────
+  // is_system = 1 — автоматичне повідомлення про книгу
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS messages (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      chat_id    INTEGER NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+      sender_id  INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      text       TEXT,
+      image_path TEXT    DEFAULT NULL,
+      is_system  INTEGER DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // ── Рейтинги чатів ────────────────────────────────────
+  // Кожен учасник може оцінити чат лише один раз
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS chat_ratings (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      chat_id    INTEGER NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+      user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      rating     INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(chat_id, user_id)
+    )
+  `);
+
+  await runMigrations(db);
   console.log("📚 База даних готова!");
 }
 
 async function runMigrations(db) {
-  // Додаємо avatar до users якщо відсутня
-  await safeAddColumn(db, "users", "avatar", "TEXT DEFAULT NULL");
-
-  // Прибираємо застарілі колонки зі старої схеми
-  // (SQLite не підтримує DROP COLUMN до версії 3.35,
-  //  тому просто ігноруємо — вони не заважають)
+  await safeAddColumn(db, "users",    "avatar",     "TEXT DEFAULT NULL");
+  await safeAddColumn(db, "messages", "image_path", "TEXT DEFAULT NULL");
+  await safeAddColumn(db, "messages", "is_system",  "INTEGER DEFAULT 0");
 }
 
-/**
- * Безпечно додає колонку якщо вона ще не існує.
- * SQLite не має IF NOT EXISTS для ALTER TABLE ADD COLUMN,
- * тому ловимо помилку якщо колонка вже є.
- */
 async function safeAddColumn(db, table, column, definition) {
   try {
     await db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
-    console.log(`✅ Міграція: додано ${table}.${column}`);
+    console.log(`✅ Міграція: ${table}.${column} додано`);
   } catch (e) {
-    // "duplicate column name" — колонка вже є, все ок
-    if (!e.message.includes("duplicate column name")) {
-      throw e;
-    }
+    if (!e.message.includes("duplicate column name")) throw e;
   }
 }
