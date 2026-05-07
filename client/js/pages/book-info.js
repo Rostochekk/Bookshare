@@ -2,6 +2,7 @@ import { initNavbar }  from "../modules/navbar.js";
 import { booksApi }    from "../api/books.js";
 import { chatsApi }    from "../api/chats.js";
 import { auth }        from "../core/router.js";
+import { showAlert }   from "../core/utils.js";
 import { CATEGORY_LABELS, CONDITION_LABELS, buildBookCard } from "../modules/books/bookCard.js";
 
 initNavbar();
@@ -99,30 +100,60 @@ function renderBook(b) {
 
     const user = auth.getUser();
 
+    // ── Кастомний алерт замість alert() ────────────────────
     if (String(b.owner_id) === String(user.id)) {
-      alert("Це ваша власна книга.");
+      showAlert({
+        type:    "info",
+        title:   "Це ваша книга",
+        message: "Ви не можете написати самому собі. Перейдіть до профілю, щоб редагувати оголошення.",
+        confirmText: "Зрозуміло",
+      });
       return;
     }
 
     try {
       if (contactBtn) {
-        contactBtn.textContent = "Відкриваємо чат...";
-        contactBtn.disabled    = true;
+        contactBtn.innerHTML = `
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+          </svg>
+          Відкриваємо чат...
+        `;
+        contactBtn.disabled = true;
       }
 
       const data = await chatsApi.startChat(b.id, user.id);
       window.location.href = `chat.html?chat=${data.chat_id}`;
     } catch (err) {
-      alert("Помилка створення чату: " + err.message);
+      // ── Кастомний алерт для помилки ────────────────────
+      showAlert({
+        type:    "error",
+        title:   "Помилка",
+        message: "Не вдалося відкрити чат: " + (err.message || "невідома помилка"),
+        confirmText: "Закрити",
+      });
       if (contactBtn) {
-        contactBtn.textContent = "Зв'язатися з власником";
-        contactBtn.disabled    = false;
+        contactBtn.innerHTML = `
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+          Зв'язатися з власником
+        `;
+        contactBtn.disabled = false;
       }
     }
   };
 
   contactBtn?.addEventListener("click", handleChat);
   ownerChatBtn?.addEventListener("click", handleChat);
+
+  // Анімація спінера
+  if (!document.getElementById("_spin_style")) {
+    const s = document.createElement("style");
+    s.id = "_spin_style";
+    s.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
+    document.head.appendChild(s);
+  }
 }
 
 function renderRelated(books) {

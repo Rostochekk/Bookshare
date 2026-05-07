@@ -61,6 +61,55 @@ export function showConfirm({ title, message, confirmText = "Видалити", 
   });
 }
 
+// ── Info modal (замість alert) ─────────────────────────────
+// type: "info" | "warning" | "error"
+export function showAlert({ title, message, type = "info", confirmText = "Зрозуміло" }) {
+  document.querySelector(".bs-modal-overlay")?.remove();
+
+  const icons = {
+    info: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="8"/><line x1="12" y1="12" x2="12" y2="16"/></svg>`,
+    warning: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+    error: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+  };
+
+  const iconColors = {
+    info:    "background:#eff6ff;color:#2563eb;",
+    warning: "background:#fffbeb;color:#d97706;",
+    error:   "background:#fef2f2;color:#e53935;",
+  };
+
+  const btnColors = {
+    info:    "background:#2563eb;",
+    warning: "background:#d97706;",
+    error:   "background:#e53935;",
+  };
+
+  const overlay = document.createElement("div");
+  overlay.className = "bs-modal-overlay";
+  overlay.innerHTML = `
+    <div class="bs-modal">
+      <div class="bs-modal__icon" style="${iconColors[type] || iconColors.info}">
+        ${icons[type] || icons.info}
+      </div>
+      <h3 class="bs-modal__title">${title}</h3>
+      <p class="bs-modal__message">${message}</p>
+      <div class="bs-modal__actions">
+        <button class="bs-modal__confirm bs-modal__confirm--single" style="${btnColors[type] || btnColors.info}">${confirmText}</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add("bs-modal-overlay--visible"));
+
+  const close = () => {
+    overlay.classList.remove("bs-modal-overlay--visible");
+    setTimeout(() => overlay.remove(), 250);
+  };
+
+  overlay.querySelector(".bs-modal__confirm").addEventListener("click", close);
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) close(); });
+}
+
 // ── Plural ─────────────────────────────────────────────────
 export function pluralBooks(n) {
   if (n % 10 === 1 && n % 100 !== 11) return "книга";

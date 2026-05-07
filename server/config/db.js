@@ -75,6 +75,18 @@ export async function initDB() {
     )
   `);
 
+  // ── Таблиця прочитаних чатів ─────────────────────────────
+  // Зберігає коли юзер востаннє відкрив чат.
+  // unread_count = повідомлення від інших після цієї дати.
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS chat_reads (
+      chat_id    INTEGER NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+      user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      read_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+      PRIMARY KEY (chat_id, user_id)
+    )
+  `);
+
   await runMigrations(db);
   console.log("📚 База даних готова!");
 }

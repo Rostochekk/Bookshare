@@ -1,9 +1,9 @@
 import { openDB }            from "../config/db.js";
-import { buildAvatarUrl, formatChatForUser, shouldShowRating, RATING_THRESHOLD } from "../services/chatService.js";
+import { buildAvatarUrl, formatChatForUser, shouldShowRating } from "../services/chatService.js";
 import {
   getChatsByUser, getChatAccess, getMessagesByChatId,
   getMessageCount, getChatRating, findExistingChat,
-  createChat, createMessage, upsertRating,
+  createChat, createMessage, upsertRating, markChatAsRead,
 } from "../models/chatModel.js";
 
 export async function getUserChats(req, res) {
@@ -29,6 +29,9 @@ export async function getChatMessages(req, res) {
 
     const messages = await getMessagesByChatId(req.params.id);
     const existing = await getChatRating(req.params.id, user_id);
+
+    // Автоматично позначаємо як прочитане при завантаженні повідомлень
+    await markChatAsRead(req.params.id, user_id);
 
     res.json({
       chat,
@@ -91,6 +94,9 @@ export async function sendMessage(req, res) {
     const msg   = await createMessage(req.params.id, sender_id, text, image_path);
     const total = await getMessageCount(req.params.id);
     const rated = await getChatRating(req.params.id, sender_id);
+
+    // Відправник автоматично прочитав своє ж повідомлення
+    await markChatAsRead(req.params.id, sender_id);
 
     res.status(201).json({
       message: {

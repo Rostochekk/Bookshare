@@ -33,9 +33,8 @@ export async function getChatsByUser(userId) {
         WHERE m.chat_id = c.id
           AND m.sender_id != ?
           AND m.created_at > COALESCE(
-            (SELECT r.created_at FROM messages r
-             WHERE r.chat_id = c.id AND r.sender_id = ?
-             ORDER BY r.created_at DESC LIMIT 1),
+            (SELECT cr.read_at FROM chat_reads cr
+             WHERE cr.chat_id = c.id AND cr.user_id = ?),
             '1970-01-01'
           )
       ) AS unread_count
@@ -125,5 +124,16 @@ export async function upsertRating(chatId, userId, rating) {
      VALUES (?, ?, ?)
      ON CONFLICT(chat_id, user_id) DO UPDATE SET rating = excluded.rating`,
     [chatId, userId, rating]
+  );
+}
+
+// ── Позначити чат як прочитаний ──────────────────────────────
+export async function markChatAsRead(chatId, userId) {
+  const db = await openDB();
+  await db.run(
+    `INSERT INTO chat_reads (chat_id, user_id, read_at)
+     VALUES (?, ?, CURRENT_TIMESTAMP)
+     ON CONFLICT(chat_id, user_id) DO UPDATE SET read_at = CURRENT_TIMESTAMP`,
+    [chatId, userId]
   );
 }
