@@ -21,7 +21,7 @@ export async function initDB() {
       id            INTEGER PRIMARY KEY AUTOINCREMENT,
       name          TEXT    NOT NULL,
       email         TEXT    NOT NULL UNIQUE,
-      password_hash TEXT    NOT NULL,
+      password_hash TEXT,
       avatar        TEXT    DEFAULT NULL,
       created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
     )
@@ -93,8 +93,19 @@ export async function initDB() {
 
 async function runMigrations(db) {
   await safeAddColumn(db, "users",    "avatar",     "TEXT DEFAULT NULL");
+  await safeAddColumn(db, "users",    "google_id",  "TEXT");            
   await safeAddColumn(db, "messages", "image_path", "TEXT DEFAULT NULL");
   await safeAddColumn(db, "messages", "is_system",  "INTEGER DEFAULT 0");
+
+  // ← ДОДАТИ ЦІЛИЙ БЛОК:
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS password_resets (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token      TEXT    NOT NULL UNIQUE,
+      expires_at INTEGER NOT NULL
+    )
+  `);
 }
 
 async function safeAddColumn(db, table, column, definition) {

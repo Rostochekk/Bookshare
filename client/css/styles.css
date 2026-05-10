@@ -1909,6 +1909,8 @@ body {
 /* Блок опису */
 .bookinfo-desc-block {
   margin-bottom: 28px;
+  word-break: break-word;
+overflow-wrap: break-word;
 }
 .bookinfo-desc-block h3 {
   font-size: 17px;

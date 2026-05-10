@@ -6,6 +6,10 @@ initNavbar();
 
 if (auth.isLoggedIn()) window.location.href = "index.html";
 
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
 window.togglePassword = function(id, btn) {
   const input  = document.getElementById(id);
   const isText = input.type === "text";
@@ -23,6 +27,7 @@ document.querySelector(".auth-submit-btn").addEventListener("click", async () =>
   clearError();
 
   if (!name || !email || !password) { showError("Заповніть усі поля"); return; }
+  if (!isValidEmail(email))          { showError("Невірний формат електронної пошти"); return; }
   if (password !== confirm)          { showError("Паролі не збігаються"); return; }
   if (password.length < 6)           { showError("Пароль мінімум 6 символів"); return; }
 
@@ -38,6 +43,17 @@ document.querySelector(".auth-submit-btn").addEventListener("click", async () =>
     btn.textContent = "Створити акаунт";
   }
 });
+
+// Обробка редіректу після Google OAuth (якщо хтось потрапить сюди)
+const params     = new URLSearchParams(window.location.search);
+const googleUser = params.get("google_user");
+if (googleUser) {
+  try {
+    const user = JSON.parse(decodeURIComponent(googleUser));
+    auth.setUser(user); 
+    window.location.href = "index.html";
+  } catch (_) {}
+}
 
 function showError(msg) {
   let errEl = document.getElementById("auth-error");

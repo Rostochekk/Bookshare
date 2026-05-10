@@ -87,7 +87,8 @@ export function initNavbar() {
 
   // ── Бейдж непрочитаних повідомлень ──────────────────────
   if (user) {
-    loadUnreadCount(user.id);
+   loadUnreadCount(user.id);
+   setInterval(() => loadUnreadCount(user.id), 3000); // кожні 10 секунд
   }
 }
 

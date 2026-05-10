@@ -6,6 +6,10 @@ initNavbar();
 
 if (auth.isLoggedIn()) window.location.href = "index.html";
 
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+}
+
 window.togglePassword = function(id, btn) {
   const input  = document.getElementById(id);
   const isText = input.type === "text";
@@ -18,7 +22,10 @@ document.querySelector(".auth-submit-btn").addEventListener("click", async () =>
   const password = document.getElementById("loginPassword").value;
   const btn      = document.querySelector(".auth-submit-btn");
 
-  if (!email || !password) { showError("Введіть email і пароль"); return; }
+  clearError();
+
+  if (!email || !password)  { showError("Введіть email і пароль"); return; }
+  if (!isValidEmail(email)) { showError("Невірний формат електронної пошти"); return; }
 
   btn.disabled    = true;
   btn.textContent = "Вхід...";
@@ -33,6 +40,36 @@ document.querySelector(".auth-submit-btn").addEventListener("click", async () =>
   }
 });
 
+// Кнопка Google
+document.getElementById("google-login-btn")?.addEventListener("click", () => {
+  window.location.href = "/api/users/auth/google";
+});
+
+// Обробка редіректу після Google OAuth
+const params      = new URLSearchParams(window.location.search);
+const googleUser  = params.get("google_user");
+const googleError = params.get("error");
+
+if (googleUser) {
+  console.log("googleUser raw:", googleUser);
+  try {
+    const user = JSON.parse(googleUser);
+    auth.setUser(user);
+    window.location.href = "index.html";
+  } catch (_) {
+    try {
+      const user = JSON.parse(decodeURIComponent(googleUser));
+      auth.setUser(user);
+      window.location.href = "index.html";
+    } catch (_) {
+      showError("Помилка входу через Google");
+    }
+  }
+}
+if (googleError === "google") {
+  showError("Не вдалося увійти через Google. Спробуйте ще раз.");
+}
+
 function showError(msg) {
   let errEl = document.getElementById("auth-error");
   if (!errEl) {
@@ -42,4 +79,9 @@ function showError(msg) {
     document.querySelector(".auth-submit-btn").before(errEl);
   }
   errEl.textContent = msg;
+}
+
+function clearError() {
+  const errEl = document.getElementById("auth-error");
+  if (errEl) errEl.textContent = "";
 }

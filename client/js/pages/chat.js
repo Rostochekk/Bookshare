@@ -68,6 +68,7 @@ document.addEventListener("visibilitychange", updateStatusDisplay);
 // ════════════════════════════════════════════════════════════
 async function init() {
   await loadChatList();
+  setInterval(loadChatList, 5000);
   const params = new URLSearchParams(window.location.search);
   const chatId = params.get("chat");
   const bookId = params.get("book_id");
@@ -78,16 +79,19 @@ async function init() {
     if (item) item.click();
   }
 }
+let lastChatsJson = "";
 
 async function loadChatList() {
   try {
     const chats = await chatsApi.getChats(ME.id);
+    const json  = JSON.stringify(chats);
+    if (json === lastChatsJson) return; // нічого не змінилось — не мигаємо
+    lastChatsJson = json;
     renderChatList(chats);
   } catch (e) {
     chatList.innerHTML = `<p style="padding:16px;color:#c00;font-size:14px">Помилка: ${e.message}</p>`;
   }
 }
-
 function renderChatList(chats) {
   if (!chats.length) {
     chatList.innerHTML = `<p style="padding:20px;color:#aaa;text-align:center;font-size:14px">Чатів поки немає</p>`;
