@@ -1,9 +1,10 @@
 {
   "type": "module",
-  "main": "server/server.js",
-  "scripts": {
-    "start": "node server/server.js"
-  },
+"main": "server/server.js",
+"scripts": {
+  "start": "node server/server.js",
+  "build": "npm rebuild sqlite3"
+},
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
