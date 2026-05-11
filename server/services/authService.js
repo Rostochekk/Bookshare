@@ -38,9 +38,12 @@ export async function loginUser(email, password) {
   if (!isValidEmail(email))
     throw { status: 400, message: "Невірний формат електронної пошти" };
 
-  const user = await findUserByEmail(email);
+  const user = await findUserByEmail(email);  // ← тільки один раз
   if (!user)
     throw { status: 401, message: "Невірний email або пароль" };
+
+  if (user.role === "banned")
+    throw { status: 403, message: "Ваш акаунт заблоковано" };
 
   if (!user.password_hash)
     throw { status: 401, message: "Цей акаунт використовує вхід через Google" };

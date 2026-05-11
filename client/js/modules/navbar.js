@@ -88,8 +88,17 @@ export function initNavbar() {
   // ── Бейдж непрочитаних повідомлень ──────────────────────
   if (user) {
    loadUnreadCount(user.id);
+   checkBanStatus(user.id);
+setInterval(() => checkBanStatus(user.id), 15000);
    setInterval(() => loadUnreadCount(user.id), 3000); // кожні 10 секунд
   }
+}
+async function checkBanStatus(userId) {
+  try {
+    const res  = await fetch(`/api/users/me?id=${userId}`);
+    const data = await res.json();
+    if (data.role === "banned") auth.logout();
+  } catch {}
 }
 
 async function loadUnreadCount(userId) {

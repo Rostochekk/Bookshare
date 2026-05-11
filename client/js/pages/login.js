@@ -69,6 +69,9 @@ if (googleUser) {
 if (googleError === "google") {
   showError("Не вдалося увійти через Google. Спробуйте ще раз.");
 }
+if (googleError === "banned") {
+  showError("Ваш акаунт заблоковано");
+}
 
 function showError(msg) {
   let errEl = document.getElementById("auth-error");

@@ -69,18 +69,25 @@ document.addEventListener("visibilitychange", updateStatusDisplay);
 async function init() {
   await loadChatList();
   setInterval(loadChatList, 5000);
-  const params = new URLSearchParams(window.location.search);
-  const chatId = params.get("chat");
-  const bookId = params.get("book_id");
+  const params  = new URLSearchParams(window.location.search);
+  const chatId  = params.get("chat");
+  const bookId  = params.get("book_id");
+  const userId  = params.get("user_id");
+
   if (chatId) {
     openChat(Number(chatId));
   } else if (bookId) {
     const item = chatList.querySelector(`[data-chat-book="${bookId}"]`);
     if (item) item.click();
+  } else if (userId) {
+    const chats = await chatsApi.getChats(ME.id);
+    const existing = chats.find(c => String(c.other_id) === String(userId));
+    if (existing) {
+      openChat(existing.id);
+    }
   }
 }
 let lastChatsJson = "";
-
 async function loadChatList() {
   try {
     const chats = await chatsApi.getChats(ME.id);
@@ -176,7 +183,16 @@ function updateHeader(chatMeta) {
     };
   }
   if (headerStatus) headerStatus.innerHTML = getStatusLabel(getMyStatus());
-
+if (headerName && chatMeta.other_id) {
+  headerName.style.cursor = "pointer";
+  headerName.onclick = () => {
+    window.location.href = `public-profile.html?id=${chatMeta.other_id}`;
+  };
+  headerAvatar.style.cursor = "pointer";
+  headerAvatar.onclick = () => {
+    window.location.href = `public-profile.html?id=${chatMeta.other_id}`;
+  };
+}
   if (!bookPreview) return;
   if (chatMeta.book_id && chatMeta.book_title) {
     bookPreview.style.display = "flex";

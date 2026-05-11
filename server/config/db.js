@@ -18,13 +18,14 @@ export async function initDB() {
 
   await db.exec(`
     CREATE TABLE IF NOT EXISTS users (
-      id            INTEGER PRIMARY KEY AUTOINCREMENT,
-      name          TEXT    NOT NULL,
-      email         TEXT    NOT NULL UNIQUE,
-      password_hash TEXT,
-      avatar        TEXT    DEFAULT NULL,
-      created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  name          TEXT    NOT NULL,
+  email         TEXT    NOT NULL UNIQUE,
+  password_hash TEXT,
+  avatar        TEXT    DEFAULT NULL,
+  role          TEXT    DEFAULT 'user',
+  created_at    DATETIME DEFAULT CURRENT_TIMESTAMP
+)
   `);
 
   await db.exec(`
@@ -93,7 +94,8 @@ export async function initDB() {
 
 async function runMigrations(db) {
   await safeAddColumn(db, "users",    "avatar",     "TEXT DEFAULT NULL");
-  await safeAddColumn(db, "users",    "google_id",  "TEXT");            
+  await safeAddColumn(db, "users",    "google_id",  "TEXT");
+  await safeAddColumn(db, "users",    "role",       "TEXT DEFAULT 'user'");
   await safeAddColumn(db, "messages", "image_path", "TEXT DEFAULT NULL");
   await safeAddColumn(db, "messages", "is_system",  "INTEGER DEFAULT 0");
 

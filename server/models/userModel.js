@@ -3,15 +3,14 @@ import { openDB } from "../config/db.js";
 export async function findUserByEmail(email) {
   const db = await openDB();
   return db.get(
-    "SELECT id, name, email, avatar, password_hash, google_id FROM users WHERE email = ?",
+    "SELECT id, name, email, avatar, password_hash, google_id, role FROM users WHERE email = ?",
     [email]
   );
 }
-
 export async function findUserById(id) {
   const db = await openDB();
   return db.get(
-    "SELECT id, name, email, avatar FROM users WHERE id = ?",
+    "SELECT id, name, email, avatar, role FROM users WHERE id = ?",
     [id]
   );
 }
@@ -19,7 +18,7 @@ export async function findUserById(id) {
 export async function findUserByGoogleId(googleId) {
   const db = await openDB();
   return db.get(
-    "SELECT id, name, email, avatar FROM users WHERE google_id = ?",
+    "SELECT id, name, email, avatar, role FROM users WHERE google_id = ?",
     [googleId]
   );
 }

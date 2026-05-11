@@ -75,7 +75,7 @@ export async function resetPasswordHandler(req, res) {
 // Викликається після passport.authenticate("google")
 export function googleCallback(req, res) {
   const user = req.user;
-  if (!user) return res.redirect("/login.html?error=google");
+  if (!user) return res.redirect("/login.html?error=banned");
   const encoded = encodeURIComponent(JSON.stringify(user));
   res.redirect(`/login.html?google_user=${encoded}`);
 }
